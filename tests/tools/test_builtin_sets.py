@@ -14,7 +14,9 @@ def test_file_tools_register_cleanly() -> None:
         "glob",
         "grep",
         "list_dir",
+        "multi_edit",
         "read_file",
+        "todo",
         "write_file",
     ]
 
