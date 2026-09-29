@@ -4,5 +4,6 @@
    `python -m venv .venv && .venv/bin/pip install -e ".[dev]"`
 2. Keep changes small and focused; one logical change per commit.
 3. Use Conventional Commit prefixes (`feat:`, `fix:`, `test:`, `docs:` ...).
-4. Before opening a PR run `pytest`, `ruff check .`, `ruff format --check .` and `mypy`.
+4. Before opening a PR run `pytest --cov`, `ruff check .`, `ruff format --check .` and `mypy`.
+   `pre-commit install` runs the lint and type checks on every commit.
 5. Any change to the safety layer needs tests that exercise the bypass it prevents.
