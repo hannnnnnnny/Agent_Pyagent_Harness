@@ -78,7 +78,9 @@ def system_resolver(host: str, port: int) -> list[str]:
 
 
 def resolve_public(
-    target: Target, resolver: Resolver = system_resolver, allow_private: bool = False
+    target: Target,
+    resolver: Resolver = system_resolver,
+    address_allowed: Callable[[str], bool] = is_public_address,
 ) -> str:
     """Resolve ``target`` and return an address safe to connect to.
 
@@ -91,11 +93,10 @@ def resolve_public(
         raise PolicyViolation(f"could not resolve {target.host}: {exc}") from exc
     if not addresses:
         raise PolicyViolation(f"{target.host} did not resolve to any address")
-    if not allow_private:
-        blocked = [a for a in addresses if not is_public_address(a)]
-        if blocked:
-            raise PolicyViolation(
-                f"{target.host} resolves to a non-public address ({blocked[0]}); "
-                "local, private, and metadata addresses are not reachable"
-            )
+    blocked = [a for a in addresses if not address_allowed(a)]
+    if blocked:
+        raise PolicyViolation(
+            f"{target.host} resolves to a non-public address ({blocked[0]}); "
+            "local, private, and metadata addresses are not reachable"
+        )
     return addresses[0]

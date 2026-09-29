@@ -96,9 +96,10 @@ def test_resolve_public_rejects_any_private_answer(addresses: tuple[str, ...]) -
         resolve_public(parse_target("http://rebind.example"), _resolver(*addresses))
 
 
-def test_resolve_public_can_allow_private_for_tests() -> None:
+def test_resolve_public_accepts_a_custom_address_policy() -> None:
     target = parse_target("http://localhost:8000")
-    assert resolve_public(target, _resolver("127.0.0.1"), allow_private=True) == "127.0.0.1"
+    loopback_only = {"127.0.0.1"}.__contains__
+    assert resolve_public(target, _resolver("127.0.0.1"), loopback_only) == "127.0.0.1"
 
 
 def test_resolution_failures_are_policy_errors() -> None:
