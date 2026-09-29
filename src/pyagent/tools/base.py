@@ -8,6 +8,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, ClassVar
 
+from pyagent.safety.workspace import Workspace
+
 
 class Risk(enum.Enum):
     """How much damage a tool can do; drives approval decisions."""
@@ -22,8 +24,12 @@ class Risk(enum.Enum):
 class ToolContext:
     """Per-run resources handed to every tool invocation."""
 
-    root: Path
+    workspace: Workspace
     extras: dict[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def for_root(cls, root: str | Path) -> ToolContext:
+        return cls(workspace=Workspace(root))
 
 
 class Tool(ABC):

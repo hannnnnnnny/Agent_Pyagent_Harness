@@ -31,7 +31,9 @@ class Echo(Tool):
 
 @pytest.fixture
 def executor(tmp_path: Path) -> ToolExecutor:
-    return ToolExecutor(ToolRegistry([Echo()]), ToolContext(root=tmp_path), max_output_chars=200)
+    return ToolExecutor(
+        ToolRegistry([Echo()]), ToolContext.for_root(tmp_path), max_output_chars=200
+    )
 
 
 def test_successful_call(executor: ToolExecutor) -> None:
@@ -70,7 +72,7 @@ def test_gate_can_block_a_call(tmp_path: Path) -> None:
         ran.append(tool.name)
         raise ApprovalDenied("user said no")
 
-    executor = ToolExecutor(ToolRegistry([Echo()]), ToolContext(root=tmp_path), gates=[deny])
+    executor = ToolExecutor(ToolRegistry([Echo()]), ToolContext.for_root(tmp_path), gates=[deny])
     result = executor.execute(ToolCall("1", "echo", {"text": "hi"}))
     assert result.is_error
     assert "user said no" in result.content
@@ -81,7 +83,7 @@ def test_gates_run_after_validation(tmp_path: Path) -> None:
     calls: list[str] = []
     executor = ToolExecutor(
         ToolRegistry([Echo()]),
-        ToolContext(root=tmp_path),
+        ToolContext.for_root(tmp_path),
         gates=[lambda tool, call: calls.append(call.id)],
     )
     executor.execute(ToolCall("bad", "echo", {}))
