@@ -52,3 +52,15 @@ def test_cannot_edit_protected_file(run: Runner) -> None:
     result = run(tool, path=".env", old_string="abc", new_string="def")
     assert result.is_error
     assert (run.root / ".env").read_text() == "TOKEN=abc"
+
+
+def test_multiline_edit_in_crlf_file(run: Runner) -> None:
+    (run.root / "win.py").write_bytes(b"def f():\r\n    return 1\r\n")
+    result = run(
+        tool,
+        path="win.py",
+        old_string="def f():\n    return 1",
+        new_string="def f():\n    return 2",
+    )
+    assert not result.is_error, result.content
+    assert (run.root / "win.py").read_bytes() == b"def f():\r\n    return 2\r\n"
