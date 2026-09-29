@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from pyagent.errors import ToolError
+from pyagent.diffs import unified_diff
 from pyagent.safety.fileio import read_text, write_text
 from pyagent.tools.base import Risk, Tool, ToolContext
+from pyagent.tools.builtin.editing import replace_exact
 
 
 class EditFile(Tool):
@@ -34,18 +35,14 @@ class EditFile(Tool):
     def run(self, args: dict[str, Any], ctx: ToolContext) -> str:
         path = ctx.workspace.resolve_for_write(args["path"])
         ctx.workspace.protected.check_read(ctx.workspace.relative(path))
-        old, new = args["old_string"], args["new_string"]
-        if old == new:
-            raise ToolError("old_string and new_string are identical")
         text = read_text(path)
-        count = text.count(old)
-        if count == 0:
-            raise ToolError("old_string was not found in the file")
-        if count > 1 and not args.get("replace_all", False):
-            raise ToolError(
-                f"old_string matches {count} times; add surrounding context "
-                "to make it unique or set replace_all"
-            )
-        write_text(path, text.replace(old, new))
+        updated, count = replace_exact(
+            text,
+            args["old_string"],
+            args["new_string"],
+            replace_all=args.get("replace_all", False),
+        )
+        write_text(path, updated)
         noun = "occurrence" if count == 1 else "occurrences"
-        return f"Replaced {count} {noun} in {ctx.workspace.relative(path)}"
+        rel = ctx.workspace.relative(path)
+        return f"Replaced {count} {noun} in {rel}\n{unified_diff(text, updated, rel)}"

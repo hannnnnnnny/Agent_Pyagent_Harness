@@ -14,7 +14,9 @@ def source(run: Runner) -> Runner:
 
 def test_unique_replacement(source: Runner) -> None:
     result = source(tool, path="m.py", old_string="z = 2", new_string="z = 3")
-    assert result.content == "Replaced 1 occurrence in m.py"
+    assert result.content.startswith("Replaced 1 occurrence in m.py\n--- a/m.py")
+    assert "-z = 2" in result.content
+    assert "+z = 3" in result.content
     assert (source.root / "m.py").read_text() == "x = 1\ny = 1\nz = 3\n"
 
 
@@ -27,7 +29,7 @@ def test_ambiguous_match_is_refused(source: Runner) -> None:
 
 def test_replace_all(source: Runner) -> None:
     result = source(tool, path="m.py", old_string="= 1", new_string="= 9", replace_all=True)
-    assert result.content == "Replaced 2 occurrences in m.py"
+    assert result.content.startswith("Replaced 2 occurrences in m.py")
 
 
 def test_missing_text_is_error(source: Runner) -> None:
@@ -50,3 +52,15 @@ def test_cannot_edit_protected_file(run: Runner) -> None:
     result = run(tool, path=".env", old_string="abc", new_string="def")
     assert result.is_error
     assert (run.root / ".env").read_text() == "TOKEN=abc"
+
+
+def test_multiline_edit_in_crlf_file(run: Runner) -> None:
+    (run.root / "win.py").write_bytes(b"def f():\r\n    return 1\r\n")
+    result = run(
+        tool,
+        path="win.py",
+        old_string="def f():\n    return 1",
+        new_string="def f():\n    return 2",
+    )
+    assert not result.is_error, result.content
+    assert (run.root / "win.py").read_bytes() == b"def f():\r\n    return 2\r\n"

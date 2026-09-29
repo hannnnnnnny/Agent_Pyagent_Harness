@@ -66,8 +66,10 @@ or reading `.env`) can never be approved in any mode.
 | `list_dir` | read | Directory listing (protected entries hidden) |
 | `glob` | read | Find files by pattern, e.g. `**/*.py` |
 | `grep` | read | Regex or literal search across files |
+| `todo` | read | The agent's own task list for multi-step work |
 | `write_file` | write | Create or replace a file (atomic, size-limited) |
 | `edit_file` | write | Exact, unique string replacement |
+| `multi_edit` | write | Several replacements in one file, all or nothing |
 | `run_shell` | execute | Policy-checked shell command with a scrubbed environment |
 | `web_fetch` | network | Opt-in: fetch a public URL as text (SSRF-protected) |
 
