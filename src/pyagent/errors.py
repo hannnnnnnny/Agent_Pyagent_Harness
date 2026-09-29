@@ -21,3 +21,19 @@ class ToolError(PyAgentError):
 
 class ToolInputError(ToolError):
     """Raised when tool input fails schema validation."""
+
+
+class SafetyError(PyAgentError):
+    """Base class for refusals made by the safety layer."""
+
+
+class SandboxViolation(SafetyError):
+    """Raised when an action would touch something outside the workspace."""
+
+
+class PolicyViolation(SafetyError):
+    """Raised when a command or action is blocked by policy."""
+
+
+class ApprovalDenied(SafetyError):
+    """Raised when a human (or approval policy) declines an action."""
