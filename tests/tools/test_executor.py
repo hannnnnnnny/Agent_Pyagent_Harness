@@ -98,3 +98,13 @@ def test_long_output_is_truncated(executor: ToolExecutor) -> None:
 def test_execute_all_preserves_order(executor: ToolExecutor) -> None:
     calls = [ToolCall(str(i), "echo", {"text": str(i)}) for i in range(3)]
     assert [r.tool_use_id for r in executor.execute_all(calls)] == ["0", "1", "2"]
+
+
+def test_output_filters_apply_to_results_and_errors(tmp_path: Path) -> None:
+    executor = ToolExecutor(
+        ToolRegistry([Echo()]),
+        ToolContext.for_root(tmp_path),
+        output_filters=[lambda text: text.replace("secret", "***")],
+    )
+    assert executor.execute(ToolCall("1", "echo", {"text": "a secret"})).content == "a ***"
+    assert "***" not in executor.execute(ToolCall("2", "nope", {})).content
