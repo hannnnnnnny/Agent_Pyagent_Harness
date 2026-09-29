@@ -86,3 +86,20 @@ def test_merge_allow_prefixes_deduplicates(ws: Workspace) -> None:
     merged = merge_allow_prefixes(policy, ["pytest", "ruff check"])
     assert merged.allow_prefixes == ("pytest", "npm test", "ruff check")
     assert merged.assess("ruff check .", ws).verdict is Verdict.ALLOW
+
+
+@pytest.mark.parametrize(
+    "command",
+    ["cat .env", "grep TOKEN config/.env.local", "head ~/.ssh/id_rsa", "tail .aws/credentials"],
+)
+def test_reading_protected_files_through_shell_is_blocked(command: str, ws: Workspace) -> None:
+    assert policy.assess(command, ws).verdict is Verdict.BLOCK
+
+
+@pytest.mark.parametrize("command", ["cat ../other/file.txt", "ls /etc", "cat ~/notes.txt"])
+def test_paths_outside_workspace_need_approval(command: str, ws: Workspace) -> None:
+    assert policy.assess(command, ws).verdict is Verdict.ASK
+
+
+def test_flags_and_urls_are_not_treated_as_paths(ws: Workspace) -> None:
+    assert policy.assess("grep -rn --include=*.py foo .", ws).verdict is Verdict.ALLOW
