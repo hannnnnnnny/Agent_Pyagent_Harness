@@ -74,7 +74,9 @@ allowlisted.
   answer that changes afterwards (DNS rebinding) cannot redirect it, while TLS
   still verifies the certificate against the hostname;
 - each redirect hop is re-validated, redirects are capped, only text content
-  types are read, and bodies are size-limited.
+  types are read, and bodies are size-limited;
+- non-canonical numeric hosts (`127.1`, `0177.0.0.1`, `0x7f000001`) are refused,
+  because resolvers on different platforms disagree about what they mean;
 - without a domain allowlist every fetch needs human approval, because any URL
   can carry data out in its path or query string; unattended runs can only
   fetch allowlisted domains.
