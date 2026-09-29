@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, ClassVar
 
+from pyagent.safety.verdict import Assessment
 from pyagent.safety.workspace import Workspace
 
 
@@ -52,6 +53,14 @@ class Tool(ABC):
             "description": self.description,
             "input_schema": self.input_schema,
         }
+
+    def assess(self, args: dict[str, Any], ctx: ToolContext) -> Assessment:
+        """Judge a specific call before it runs.
+
+        Tools whose danger depends on their input (like a shell command) override
+        this; the safety gate combines it with the configured approval policy.
+        """
+        return Assessment.allow()
 
     @abstractmethod
     def run(self, args: dict[str, Any], ctx: ToolContext) -> str:

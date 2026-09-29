@@ -1,5 +1,5 @@
 from pyagent.tools.base import Risk
-from pyagent.tools.builtin import file_tools, read_only_tools
+from pyagent.tools.builtin import default_tools, file_tools, read_only_tools
 from pyagent.tools.registry import ToolRegistry
 
 
@@ -17,3 +17,8 @@ def test_file_tools_register_cleanly() -> None:
         "read_file",
         "write_file",
     ]
+
+
+def test_default_tools_add_the_shell() -> None:
+    names = {t.name for t in default_tools()}
+    assert names == {t.name for t in file_tools()} | {"run_shell"}
