@@ -29,6 +29,10 @@ block = ["docker"]
 max_turns = 20
 max_cost_usd = 2.5
 max_total_tokens = 1000000
+
+[network]
+enabled = true
+allow_domains = ["python.org"]
 """
 
 
@@ -52,6 +56,8 @@ def test_full_config(tmp_path: Path) -> None:
     assert config.max_cost_usd == 2.5
     assert config.max_total_tokens == 1_000_000
     assert config.instructions == "Run pytest before finishing."
+    assert config.network_enabled is True
+    assert config.network_allow == ("python.org",)
     assert config.source == tmp_path / CONFIG_FILENAME
 
 
@@ -76,6 +82,8 @@ def test_invalid_toml(tmp_path: Path) -> None:
         ({"budget": {"max_cost_usd": -1}}, "must be positive"),
         ({"model": "opus"}, "wrong type"),
         ({"instructions": 5}, "wrong type"),
+        ({"network": {"enabled": "yes"}}, "wrong type"),
+        ({"network": {"allow": []}}, "unknown config keys"),
     ],
 )
 def test_invalid_config_is_rejected(data: dict[str, Any], message: str) -> None:
