@@ -63,3 +63,17 @@ def test_messages_property_is_a_copy() -> None:
 
 def test_empty_conversation_has_no_last_role() -> None:
     assert Conversation().last_role is None
+
+
+def test_conversation_json_round_trip() -> None:
+    convo = Conversation()
+    convo.add_user_text("héllo")
+    convo.add_assistant(_response())
+    restored = Conversation.from_json(convo.to_json())
+    assert restored.messages == convo.messages
+
+
+@pytest.mark.parametrize("payload", ['{"role": "user"}', '[{"role": "hacker"}]', "[1]"])
+def test_conversation_from_json_rejects_malformed_payloads(payload: str) -> None:
+    with pytest.raises(ValueError):
+        Conversation.from_json(payload)
