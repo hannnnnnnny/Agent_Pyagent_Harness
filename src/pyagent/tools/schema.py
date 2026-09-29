@@ -82,3 +82,35 @@ def validate(value: Any, schema: dict[str, Any], path: str = "input") -> None:
         _check_object(value, schema, path)
     elif expected == "array":
         _check_array(value, schema, path)
+
+
+SUPPORTED_KEYWORDS = frozenset(
+    {
+        "type",
+        "description",
+        "properties",
+        "required",
+        "additionalProperties",
+        "items",
+        "enum",
+        "minLength",
+        "maxLength",
+        "minimum",
+        "maximum",
+        "maxItems",
+        "default",
+    }
+)
+
+
+def check_schema(schema: dict[str, Any], path: str = "schema") -> None:
+    """Reject schemas using keywords the validator would silently ignore."""
+    unknown = sorted(set(schema) - SUPPORTED_KEYWORDS)
+    if unknown:
+        raise ValueError(f"{path}: unsupported schema keywords {unknown}")
+    if schema.get("type") is not None and schema["type"] not in _TYPES:
+        raise ValueError(f"{path}: unknown type {schema['type']!r}")
+    for name, sub in schema.get("properties", {}).items():
+        check_schema(sub, f"{path}.{name}")
+    if "items" in schema:
+        check_schema(schema["items"], f"{path}[]")
