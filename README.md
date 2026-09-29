@@ -32,6 +32,8 @@ pyagent init                                   # optional: write pyagent.toml
 pyagent run "add type hints to utils.py and run the tests"
 pyagent chat                                   # multi-turn session
 pyagent run "continue" --resume 3f2a9c1b7d4e   # pick a session back up
+pyagent usage                                  # tokens and cost of recent runs
+pyagent policy "rm -rf build"                  # how would this command be treated?
 ```
 
 When the agent wants to do something risky it asks first:
