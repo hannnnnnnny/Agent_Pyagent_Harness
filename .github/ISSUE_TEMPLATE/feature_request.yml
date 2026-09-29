@@ -1,0 +1,19 @@
+name: Feature request
+description: Suggest a new tool, safety rule, or improvement.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety considerations
+      description: How could this be misused by a confused or manipulated model?

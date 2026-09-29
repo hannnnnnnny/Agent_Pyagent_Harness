@@ -1,5 +1,8 @@
 # pyagent
 
+[![CI](https://github.com/hannnnnnnny/Agent_Pyagent_Harness/actions/workflows/ci.yml/badge.svg)](https://github.com/hannnnnnnny/Agent_Pyagent_Harness/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/hannnnnnnny/Agent_Pyagent_Harness/actions/workflows/codeql.yml/badge.svg)](https://github.com/hannnnnnnny/Agent_Pyagent_Harness/actions/workflows/codeql.yml)
+
 A powerful, safety-first agent harness for Claude, written in Python.
 
 pyagent gives Claude real tools (files, search, and a shell) inside a single
@@ -103,6 +106,8 @@ and an offline demo.
 - [Architecture](docs/architecture.md): how a run flows through the system
 - [Security model](docs/security-model.md): what is protected, how, and the known limits
 - [Configuration](docs/configuration.md): every `pyagent.toml` setting
+- [CLI reference](docs/cli.md): every command and flag
+- [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md) and [Security policy](SECURITY.md)
 
 ## License

@@ -47,3 +47,23 @@ jobs:
       - run: ruff check .
       - run: ruff format --check .
       - run: mypy
+
+  package:
+    # Build the sdist and wheel, then prove the wheel installs and runs on its own.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install build twine
+      - run: python -m build
+      - run: twine check --strict dist/*
+      - name: Smoke-test the wheel in a clean environment
+        run: |
+          python -m venv /tmp/wheel-env
+          /tmp/wheel-env/bin/pip install dist/*.whl
+          /tmp/wheel-env/bin/pyagent --version
+          /tmp/wheel-env/bin/pyagent policy "sudo id" | grep -q '^BLOCK'
+          /tmp/wheel-env/bin/python -c "import pyagent, pathlib; assert (pathlib.Path(pyagent.__file__).parent / 'py.typed').exists()"

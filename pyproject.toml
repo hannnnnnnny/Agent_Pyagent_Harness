@@ -10,10 +10,35 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 authors = [{ name = "Yi Han" }]
+keywords = ["agent", "claude", "anthropic", "llm", "sandbox", "tool-use"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Software Development",
+  "Typing :: Typed",
+]
 dependencies = ["anthropic>=1.9", "tomli>=2.0; python_version < '3.11'"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pyagent"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [".github", ".pre-commit-config.yaml"]
+
+[project.urls]
+Homepage = "https://github.com/hannnnnnnny/Agent_Pyagent_Harness"
+Documentation = "https://github.com/hannnnnnnny/Agent_Pyagent_Harness/tree/main/docs"
+Changelog = "https://github.com/hannnnnnnny/Agent_Pyagent_Harness/blob/main/CHANGELOG.md"
+Issues = "https://github.com/hannnnnnnny/Agent_Pyagent_Harness/issues"
 
 [project.scripts]
 pyagent = "pyagent.cli.main:main"
