@@ -62,6 +62,9 @@ ToolCall
   └─ middle truncation ────────────────────────────▶ ToolResult
 ```
 
+Additional gates passed as `AgentOptions.extra_gates` run after the
+`SafetyGate`, so a project rule can only make the policy stricter.
+
 Nothing a tool does can crash the loop: every failure becomes an `is_error`
 result that the model can read and react to.
 

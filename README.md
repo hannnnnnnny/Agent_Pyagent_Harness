@@ -98,8 +98,9 @@ print(result.stop, result.text)
 ```
 
 `result.stop` is one of `completed`, `refused`, `max_tokens`, `budget`,
-`stuck`, `cancelled`, or `error`. See [`examples/`](examples/) for custom tools
-and an offline demo.
+`stuck`, `cancelled`, or `error`. See [`examples/`](examples/) for custom tools,
+project-specific policy gates (`AgentOptions(extra_gates=[...])`), and an
+offline demo.
 
 ## Documentation
 
