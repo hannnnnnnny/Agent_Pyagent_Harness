@@ -29,7 +29,7 @@ def test_decorator_produces_a_tool() -> None:
 
 
 def test_function_tool_runs_through_executor(tmp_path: Path) -> None:
-    executor = ToolExecutor(ToolRegistry([add]), ToolContext(root=tmp_path))
+    executor = ToolExecutor(ToolRegistry([add]), ToolContext.for_root(tmp_path))
     assert executor.execute(ToolCall("1", "add", {"a": 2, "b": 3})).content == "5"
 
 

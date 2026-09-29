@@ -33,7 +33,7 @@ def test_default_risk_is_read() -> None:
 
 
 def test_run_receives_context(tmp_path: Path) -> None:
-    assert Echo().run({"text": "hi"}, ToolContext(root=tmp_path)) == "hi"
+    assert Echo().run({"text": "hi"}, ToolContext.for_root(tmp_path)) == "hi"
 
 
 def test_tool_is_abstract() -> None:
