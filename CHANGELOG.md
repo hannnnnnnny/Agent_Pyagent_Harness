@@ -14,6 +14,10 @@ All notable changes to pyagent are documented here. The format follows
 - `AgentOptions.extra_gates` for project-specific policy rules.
 - `limits.max_tool_output_chars` to tune how much tool output reaches the model.
 
+### Security
+- `web_fetch` without `allow_domains` now always needs approval, so unattended
+  runs cannot send data to arbitrary URLs.
+
 ## [0.1.0]
 
 First release: a safety-first agent harness for Claude.

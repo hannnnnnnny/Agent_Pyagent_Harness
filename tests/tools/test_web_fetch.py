@@ -65,3 +65,27 @@ def test_blocked_urls_never_reach_the_network(run: Runner) -> None:
     result = executor.execute(ToolCall("1", "web_fetch", {"url": "https://example.com"}))
     assert result.is_error
     assert fetcher.urls == []
+
+
+def test_without_an_allowlist_every_fetch_needs_approval(run: Runner) -> None:
+    tool = WebFetch(FakeFetcher(PAGE))
+    assessment = tool.assess({"url": "https://example.org"}, run.ctx)
+    assert assessment.verdict is Verdict.ASK
+    assert "allow_domains" in assessment.reason
+
+
+def test_unattended_runs_cannot_fetch_arbitrary_urls(run: Runner) -> None:
+    fetcher = FakeFetcher(PAGE)
+    gate = SafetyGate(run.ctx, ApprovalMode.UNATTENDED)
+    executor = ToolExecutor(ToolRegistry([WebFetch(fetcher)]), run.ctx, gates=[gate])
+    result = executor.execute(ToolCall("1", "web_fetch", {"url": "https://example.org"}))
+    assert result.is_error
+    assert fetcher.urls == []
+
+
+def test_unattended_runs_can_fetch_allowlisted_domains(run: Runner) -> None:
+    fetcher = FakeFetcher(PAGE, allowed=("example.org",))
+    gate = SafetyGate(run.ctx, ApprovalMode.UNATTENDED)
+    executor = ToolExecutor(ToolRegistry([WebFetch(fetcher)]), run.ctx, gates=[gate])
+    result = executor.execute(ToolCall("1", "web_fetch", {"url": "https://example.org"}))
+    assert not result.is_error

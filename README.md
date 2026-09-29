@@ -55,7 +55,7 @@ When the agent wants to do something risky it asks first:
 | `read-only` | yes | blocked | blocked | blocked |
 | `ask` *(default)* | yes | ask | ask | ask |
 | `auto-edit` | yes | yes | per command policy | ask |
-| `unattended` | yes | yes | per command policy | per policy |
+| `unattended` | yes | yes | per command policy | allowlisted domains only |
 
 In `unattended` mode nobody is there to answer, so anything that would need
 approval is **denied**. Actions the policy blocks (for example `sudo`, `curl … | sh`,
