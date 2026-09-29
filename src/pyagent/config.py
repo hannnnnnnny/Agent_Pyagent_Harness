@@ -1,0 +1,162 @@
+"""Project configuration loaded from ``pyagent.toml``.
+
+Unknown keys are errors rather than being ignored: a typo in a safety setting
+(``shel.allow``) must not silently fall back to a default.
+"""
+
+from __future__ import annotations
+
+import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+from pyagent.errors import ConfigError
+from pyagent.providers.anthropic import (
+    DEFAULT_EFFORT,
+    DEFAULT_MAX_TOKENS,
+    DEFAULT_MODEL,
+    EFFORT_LEVELS,
+)
+from pyagent.safety.modes import ApprovalMode
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:  # pragma: no cover - exercised on 3.10 CI only
+    import tomli as tomllib
+
+CONFIG_FILENAME = "pyagent.toml"
+
+
+@dataclass(frozen=True)
+class Config:
+    model: str = DEFAULT_MODEL
+    effort: str = DEFAULT_EFFORT
+    max_tokens: int = DEFAULT_MAX_TOKENS
+    mode: ApprovalMode = ApprovalMode.ASK
+    max_turns: int | None = 50
+    max_cost_usd: float | None = None
+    max_total_tokens: int | None = None
+    shell_allow: tuple[str, ...] = ()
+    shell_block: tuple[str, ...] = ()
+    protect: tuple[str, ...] = ()
+    unprotect: tuple[str, ...] = ()
+    instructions: str = ""
+    audit: bool = True
+    source: Path | None = field(default=None, compare=False)
+
+
+_SCHEMA: dict[str, set[str]] = {
+    "": {"instructions", "model", "safety", "shell", "budget"},
+    "model": {"name", "effort", "max_tokens"},
+    "safety": {"mode", "protect", "unprotect", "audit"},
+    "shell": {"allow", "block"},
+    "budget": {"max_turns", "max_cost_usd", "max_total_tokens"},
+}
+
+
+def _expect(value: Any, kind: type | tuple[type, ...], key: str) -> Any:
+    # bool is an int subclass; a boolean where a number belongs is a mistake.
+    if isinstance(value, bool) and kind in (int, float, (int, float)):
+        raise ConfigError(f"{key} must be a number, not a boolean")
+    if not isinstance(value, kind):
+        raise ConfigError(f"{key} has the wrong type ({type(value).__name__})")
+    return value
+
+
+def _positive(value: Any, key: str) -> Any:
+    _expect(value, (int, float), key)
+    if value <= 0:
+        raise ConfigError(f"{key} must be positive")
+    return value
+
+
+def _strings(value: Any, key: str) -> tuple[str, ...]:
+    _expect(value, list, key)
+    return tuple(_expect(item, str, f"{key}[]") for item in value)
+
+
+def _check_keys(data: dict[str, Any], section: str) -> None:
+    unknown = sorted(set(data) - _SCHEMA[section])
+    if unknown:
+        where = f"[{section}]" if section else "top level"
+        raise ConfigError(f"unknown config keys at {where}: {', '.join(unknown)}")
+
+
+def _section(data: dict[str, Any], name: str) -> dict[str, Any]:
+    section = _expect(data.get(name, {}), dict, f"[{name}]")
+    _check_keys(section, name)
+    return dict(section)
+
+
+def _model_fields(section: dict[str, Any]) -> dict[str, Any]:
+    fields: dict[str, Any] = {}
+    if "name" in section:
+        fields["model"] = _expect(section["name"], str, "model.name")
+    if "effort" in section:
+        effort = _expect(section["effort"], str, "model.effort")
+        if effort not in EFFORT_LEVELS:
+            raise ConfigError(f"model.effort must be one of {', '.join(EFFORT_LEVELS)}")
+        fields["effort"] = effort
+    if "max_tokens" in section:
+        fields["max_tokens"] = int(_positive(section["max_tokens"], "model.max_tokens"))
+    return fields
+
+
+def _safety_fields(section: dict[str, Any]) -> dict[str, Any]:
+    fields: dict[str, Any] = {}
+    if "mode" in section:
+        mode = _expect(section["mode"], str, "safety.mode")
+        try:
+            fields["mode"] = ApprovalMode(mode)
+        except ValueError as exc:
+            choices = ", ".join(m.value for m in ApprovalMode)
+            raise ConfigError(f"safety.mode must be one of {choices}") from exc
+    for key in ("protect", "unprotect"):
+        if key in section:
+            fields[key] = _strings(section[key], f"safety.{key}")
+    if "audit" in section:
+        fields["audit"] = _expect(section["audit"], bool, "safety.audit")
+    return fields
+
+
+def _shell_fields(section: dict[str, Any]) -> dict[str, Any]:
+    return {
+        f"shell_{key}": _strings(section[key], f"shell.{key}")
+        for key in ("allow", "block")
+        if key in section
+    }
+
+
+def _budget_fields(section: dict[str, Any]) -> dict[str, Any]:
+    fields: dict[str, Any] = {}
+    for key in ("max_turns", "max_total_tokens"):
+        if key in section:
+            fields[key] = int(_positive(section[key], f"budget.{key}"))
+    if "max_cost_usd" in section:
+        fields["max_cost_usd"] = float(_positive(section["max_cost_usd"], "budget.max_cost_usd"))
+    return fields
+
+
+def parse_config(data: dict[str, Any], source: Path | None = None) -> Config:
+    _check_keys(data, "")
+    fields: dict[str, Any] = {}
+    fields.update(_model_fields(_section(data, "model")))
+    fields.update(_safety_fields(_section(data, "safety")))
+    fields.update(_shell_fields(_section(data, "shell")))
+    fields.update(_budget_fields(_section(data, "budget")))
+    if "instructions" in data:
+        fields["instructions"] = _expect(data["instructions"], str, "instructions")
+    return Config(**fields, source=source)
+
+
+def load_config(root: Path) -> Config:
+    """Load ``pyagent.toml`` from the workspace root, or defaults if absent."""
+    path = root / CONFIG_FILENAME
+    if not path.exists():
+        return Config()
+    try:
+        data = tomllib.loads(path.read_text(encoding="utf-8"))
+    except tomllib.TOMLDecodeError as exc:
+        raise ConfigError(f"{path.name} is not valid TOML: {exc}") from exc
+    return parse_config(data, source=path)
