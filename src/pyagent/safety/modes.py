@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import enum
 
+from pyagent.safety.risk import Risk
 from pyagent.safety.verdict import Assessment, Verdict
-from pyagent.tools.base import Risk
 
 
 class ApprovalMode(enum.Enum):
