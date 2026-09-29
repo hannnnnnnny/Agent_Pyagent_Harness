@@ -15,6 +15,7 @@ from pyagent.agent import Agent, RunResult
 from pyagent.cli.render import ConsoleRenderer, format_result
 from pyagent.cli.starter import STARTER_CONFIG
 from pyagent.config import CONFIG_FILENAME, Config, load_config
+from pyagent.doctor import FAIL, run_checks
 from pyagent.errors import ConfigError, PyAgentError
 from pyagent.factory import STATE_DIR, build_agent, options_from_config
 from pyagent.providers.anthropic import EFFORT_LEVELS
@@ -75,6 +76,8 @@ def build_parser() -> argparse.ArgumentParser:
     usage.add_argument("-w", "--workspace", type=Path, default=Path.cwd())
     sessions = sub.add_parser("sessions", help="list saved sessions")
     sessions.add_argument("-w", "--workspace", type=Path, default=Path.cwd())
+    doctor = sub.add_parser("doctor", help="check the environment and configuration")
+    doctor.add_argument("-w", "--workspace", type=Path, default=Path.cwd())
     init = sub.add_parser("init", help="write a starter pyagent.toml")
     init.add_argument("-w", "--workspace", type=Path, default=Path.cwd())
     return parser
@@ -223,8 +226,16 @@ def cmd_init(args: argparse.Namespace, io: IO) -> int:
     return EXIT_OK
 
 
+def cmd_doctor(args: argparse.Namespace, io: IO) -> int:
+    checks = run_checks(args.workspace)
+    for check in checks:
+        io.stdout.write(f"[{check.status:4}] {check.name:12} {check.detail}\n")
+    return EXIT_INCOMPLETE if any(c.status == FAIL for c in checks) else EXIT_OK
+
+
 # Commands that only inspect local state and never need the config file.
 _STATE_COMMANDS: dict[str, Callable[[argparse.Namespace, IO], int]] = {
+    "doctor": cmd_doctor,
     "init": cmd_init,
     "audit": cmd_audit,
     "sessions": cmd_sessions,

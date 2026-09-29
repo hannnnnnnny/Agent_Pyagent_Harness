@@ -227,3 +227,17 @@ def test_usage_command_without_runs(tmp_path: Path) -> None:
     term = Term()
     main(["usage", "-w", str(tmp_path)], io=term.io)
     assert "no runs recorded yet" in term.out
+
+
+def test_doctor_reports_checks(tmp_path: Path) -> None:
+    term = Term()
+    assert main(["doctor", "-w", str(tmp_path)], io=term.io) == EXIT_OK
+    assert "[ok  ] python" in term.out
+    assert "config" in term.out
+
+
+def test_doctor_fails_on_bad_config(tmp_path: Path) -> None:
+    (tmp_path / CONFIG_FILENAME).write_text("[typo]\n")
+    term = Term()
+    assert main(["doctor", "-w", str(tmp_path)], io=term.io) == EXIT_INCOMPLETE
+    assert "[fail] config" in term.out
