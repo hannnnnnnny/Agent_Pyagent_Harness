@@ -182,3 +182,9 @@ def test_extra_gates_run_after_the_safety_gate(tmp_path: Path) -> None:
     assert not (tmp_path / "migrations").exists()
     # The built-in gate blocked sudo first, so the custom gate never saw it.
     assert seen == ["write_file"]
+
+
+def test_output_limit_flows_from_config(tmp_path: Path) -> None:
+    options = options_from_config(parse_config({"limits": {"max_tool_output_chars": 1234}}))
+    agent = build_agent(tmp_path, ScriptedProvider([]), options)
+    assert agent.executor.max_output_chars == 1234
