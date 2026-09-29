@@ -2,7 +2,15 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.factory import STATE_DIR, AgentOptions, build_agent
+from pyagent.config import parse_config
+from pyagent.errors import ConfigError
+from pyagent.factory import (
+    STATE_DIR,
+    AgentOptions,
+    build_agent,
+    options_from_config,
+    protected_paths_from,
+)
 from pyagent.providers.scripted import ScriptedProvider, text_turn, tool_turn
 from pyagent.safety.approval import Choice, ScriptedApprover
 from pyagent.safety.audit import read_audit
@@ -78,3 +86,34 @@ def test_instructions_reach_the_system_prompt(tmp_path: Path) -> None:
     provider = ScriptedProvider([text_turn("ok")])
     build_agent(tmp_path, provider, AgentOptions(instructions="Always use tabs.")).run("x")
     assert provider.requests[0].system.endswith("Always use tabs.\n")
+
+
+def test_options_from_config() -> None:
+    config = parse_config(
+        {
+            "safety": {
+                "mode": "auto-edit",
+                "protect": ["secrets/**"],
+                "unprotect": [".env.example"],
+            },
+            "shell": {"allow": ["pytest"], "block": ["docker"]},
+            "budget": {"max_turns": 7, "max_cost_usd": 1.5},
+            "instructions": "Be brief.",
+        }
+    )
+    options = options_from_config(config)
+    assert options.mode is ApprovalMode.AUTO_EDIT
+    assert options.budget.max_turns == 7
+    assert options.budget.max_cost_usd == 1.5
+    assert options.command_policy.allow_prefixes == ("pytest",)
+    assert "docker" in options.command_policy.blocked_programs
+    assert "secrets/**" in options.protected.no_read
+    assert ".env" in options.protected.no_read
+    assert options.protected.allow == (".env.example",)
+    assert options.instructions == "Be brief."
+
+
+@pytest.mark.parametrize("pattern", [".pyagent/**", "./.git/config", ".git/**"])
+def test_state_and_git_can_never_be_unprotected(pattern: str) -> None:
+    with pytest.raises(ConfigError, match="refusing to unprotect"):
+        protected_paths_from((), (pattern,))
