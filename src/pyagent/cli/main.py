@@ -139,7 +139,7 @@ def _make_session(
 ) -> CliSession:
     store = _session_store(args.workspace)
     approver = ConsoleApprover(io.stdin, io.stdout) if io.interactive else deny_all
-    options = options_from_config(config, approver)
+    options = options_from_config(config, approver, root=args.workspace)
     options.conversation = store.load(args.resume) if args.resume else None
     options.events.subscribe(ConsoleRenderer(io.stdout, verbose=args.verbose))
     agent = build_agent(args.workspace, provider_factory(config), options)

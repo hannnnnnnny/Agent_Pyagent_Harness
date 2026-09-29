@@ -13,6 +13,7 @@ from pyagent.budget import Budget
 from pyagent.config import Config
 from pyagent.errors import ConfigError
 from pyagent.events import EventBus
+from pyagent.instructions import combine_instructions, load_instructions_file
 from pyagent.messages import Conversation
 from pyagent.prompts import build_system_prompt
 from pyagent.providers.base import Provider
@@ -100,8 +101,16 @@ def protected_paths_from(protect: tuple[str, ...], unprotect: tuple[str, ...]) -
     )
 
 
-def options_from_config(config: Config, approver: Approver = deny_all) -> AgentOptions:
-    """Translate a loaded :class:`Config` into :class:`AgentOptions`."""
+def options_from_config(
+    config: Config, approver: Approver = deny_all, root: Path | None = None
+) -> AgentOptions:
+    """Translate a loaded :class:`Config` into :class:`AgentOptions`.
+
+    ``root`` is needed only to load ``instructions_file`` from the workspace.
+    """
+    from_file = ""
+    if config.instructions_file and root is not None:
+        from_file = load_instructions_file(root, config.instructions_file)
     policy = CommandPolicy(
         allow_prefixes=config.shell_allow,
         blocked_programs=frozenset(config.shell_block),
@@ -116,7 +125,7 @@ def options_from_config(config: Config, approver: Approver = deny_all) -> AgentO
         ),
         command_policy=policy,
         protected=protected_paths_from(config.protect, config.unprotect),
-        instructions=config.instructions,
+        instructions=combine_instructions(config.instructions, from_file),
         audit=config.audit,
         extra_tools=_network_tools(config),
         dispatcher_options={
