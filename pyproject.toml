@@ -20,7 +20,7 @@ pyagent = "pyagent.cli.main:main"
 
 [project.optional-dependencies]
 # tomli lets mypy check the Python 3.10 import path from any interpreter.
-dev = ["pytest>=9.1.1", "ruff>=0.6", "mypy>=1.11", "tomli>=2.0"]
+dev = ["pytest>=9.1.1", "ruff>=0.16.9", "mypy>=1.11", "tomli>=2.0"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
