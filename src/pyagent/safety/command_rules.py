@@ -112,3 +112,75 @@ def block_rules(argv: list[str]) -> Assessment | None:
     if prog in {"chmod", "chown"} and recursive and any(a in _ROOTISH for a in argv[1:]):
         return Assessment.block(f"recursive {prog} on a root or home directory")
     return None
+
+
+NETWORK = frozenset(
+    {
+        "curl",
+        "wget",
+        "ssh",
+        "scp",
+        "sftp",
+        "rsync",
+        "nc",
+        "ncat",
+        "netcat",
+        "socat",
+        "telnet",
+        "ftp",
+        "invoke-webrequest",
+        "iwr",
+    }
+)
+_GIT_NETWORK = frozenset({"push", "pull", "fetch", "clone", "ls-remote", "submodule"})
+_GIT_DESTRUCTIVE = frozenset({"reset", "clean", "rebase", "filter-branch", "gc", "prune"})
+_INSTALLERS = {"pip": "install", "pip3": "install", "npm": "install", "yarn": "add", "uv": "add"}
+
+
+# Global git options that consume the next argument.
+_GIT_VALUE_OPTIONS = frozenset({"-C", "-c", "--git-dir", "--work-tree", "--namespace"})
+
+
+def _git_subcommand(argv: list[str]) -> str | None:
+    args = iter(argv[1:])
+    for arg in args:
+        if arg in _GIT_VALUE_OPTIONS:
+            next(args, None)
+        elif not arg.startswith("-"):
+            return arg
+    return None
+
+
+def _git_rule(argv: list[str]) -> Assessment | None:
+    if "-c" in argv or any(a.startswith("--config") for a in argv):
+        return Assessment.ask("git config overrides can run arbitrary commands")
+    sub = _git_subcommand(argv)
+    reason = None
+    if sub in _GIT_NETWORK:
+        reason = f"git {sub} contacts a remote"
+    elif sub in _GIT_DESTRUCTIVE or (sub == "checkout" and "--" in argv):
+        reason = f"git {sub} can discard work"
+    elif sub == "branch" and {"-D", "--delete"} & set(argv):
+        reason = "git branch deletion can discard work"
+    return Assessment.ask(reason) if reason else None
+
+
+def _generic_rule(prog: str, argv: list[str]) -> str | None:
+    if prog in NETWORK:
+        return f"{prog} makes network connections"
+    if prog in _INSTALLERS and _INSTALLERS[prog] in argv[1:]:
+        return f"{prog} installs third-party code"
+    if prog == "find" and {"-exec", "-execdir", "-ok", "-delete"} & set(argv):
+        return "find with -exec/-delete runs commands or deletes files"
+    if prog in {"rm", "rmdir", "mv", "shred", "truncate"}:
+        return f"{prog} can destroy data"
+    return None
+
+
+def ask_rules(argv: list[str]) -> Assessment | None:
+    """Commands that may be legitimate but need a human to confirm."""
+    prog = program_name(argv[0])
+    if prog == "git":
+        return _git_rule(argv)
+    reason = _generic_rule(prog, argv)
+    return Assessment.ask(reason) if reason else None
