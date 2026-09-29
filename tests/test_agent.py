@@ -183,3 +183,15 @@ def test_dispatcher_options_are_applied(tmp_path: Path) -> None:
     agent.run("look")
     results = agent.conversation.messages[2]["content"]
     assert [r.get("is_error", False) for r in results] == [False, True, True]
+
+
+def test_run_finished_reports_usage(tmp_path: Path) -> None:
+    seen: list[Event] = []
+    bus = EventBus()
+    bus.subscribe(seen.append)
+    make_agent(tmp_path, [text_turn("x", Usage(3, 4))], events=bus).run("go")
+    finished = seen[-1].data
+    assert finished["model"] == "scripted"
+    assert finished["usage"]["input_tokens"] == 3
+    assert finished["usage"]["output_tokens"] == 4
+    assert finished["cost_usd"] is None

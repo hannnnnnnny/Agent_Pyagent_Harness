@@ -19,6 +19,7 @@ from pyagent.errors import ConfigError, PyAgentError
 from pyagent.factory import STATE_DIR, build_agent, options_from_config
 from pyagent.providers.anthropic import EFFORT_LEVELS
 from pyagent.providers.base import Provider
+from pyagent.report import RunSummary, summarize_runs
 from pyagent.safety.approval import ConsoleApprover, deny_all
 from pyagent.safety.audit import read_audit
 from pyagent.safety.command_policy import CommandPolicy
@@ -69,6 +70,9 @@ def build_parser() -> argparse.ArgumentParser:
     audit = sub.add_parser("audit", help="print recent audit log entries")
     audit.add_argument("-n", "--tail", type=int, default=20)
     audit.add_argument("-w", "--workspace", type=Path, default=Path.cwd())
+    usage = sub.add_parser("usage", help="summarize token use and cost of recent runs")
+    usage.add_argument("-n", "--last", type=int, default=10)
+    usage.add_argument("-w", "--workspace", type=Path, default=Path.cwd())
     sessions = sub.add_parser("sessions", help="list saved sessions")
     sessions.add_argument("-w", "--workspace", type=Path, default=Path.cwd())
     init = sub.add_parser("init", help="write a starter pyagent.toml")
@@ -186,6 +190,29 @@ def cmd_audit(args: argparse.Namespace, io: IO) -> int:
     return EXIT_OK
 
 
+def _format_run(run: RunSummary) -> str:
+    cost = f"${run.cost_usd:.4f}" if run.cost_usd is not None else "-"
+    tools = sum(run.tools.values())
+    return (
+        f"{run.started[:19]:19}  {run.stop:10} {run.turns:>3} turns "
+        f"{run.usage.total_tokens:>9} tok {cost:>9}  {tools:>3} tools  {run.task[:40]}"
+    )
+
+
+def cmd_usage(args: argparse.Namespace, io: IO) -> int:
+    runs = summarize_runs(read_audit(args.workspace / STATE_DIR / "audit.jsonl"))
+    shown = runs[-args.last :] if args.last > 0 else []
+    if not shown:
+        io.stdout.write("no runs recorded yet\n")
+        return EXIT_OK
+    for run in shown:
+        io.stdout.write(_format_run(run) + "\n")
+    total_tokens = sum(r.usage.total_tokens for r in shown)
+    total_cost = sum(r.cost_usd or 0.0 for r in shown)
+    io.stdout.write(f"total: {len(shown)} runs, {total_tokens} tokens, ${total_cost:.4f}\n")
+    return EXIT_OK
+
+
 def cmd_init(args: argparse.Namespace, io: IO) -> int:
     path = args.workspace / CONFIG_FILENAME
     if path.exists():
@@ -196,13 +223,18 @@ def cmd_init(args: argparse.Namespace, io: IO) -> int:
     return EXIT_OK
 
 
+# Commands that only inspect local state and never need the config file.
+_STATE_COMMANDS: dict[str, Callable[[argparse.Namespace, IO], int]] = {
+    "init": cmd_init,
+    "audit": cmd_audit,
+    "sessions": cmd_sessions,
+    "usage": cmd_usage,
+}
+
+
 def _dispatch(args: argparse.Namespace, io: IO, factory: ProviderFactory) -> int:
-    if args.command == "init":
-        return cmd_init(args, io)
-    if args.command == "audit":
-        return cmd_audit(args, io)
-    if args.command == "sessions":
-        return cmd_sessions(args, io)
+    if args.command in _STATE_COMMANDS:
+        return _STATE_COMMANDS[args.command](args, io)
     config = apply_overrides(load_config(args.workspace), args)
     if args.command == "policy":
         return cmd_policy(args, config, io)

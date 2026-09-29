@@ -207,3 +207,23 @@ def test_resuming_unknown_session_is_a_usage_error(tmp_path: Path) -> None:
     )
     assert code == EXIT_USAGE
     assert "no session" in term.err
+
+
+def test_usage_command_summarizes_runs(tmp_path: Path) -> None:
+    for answer in ("one", "two"):
+        _, make = factory(tool_turn(("list_dir", {})), text_turn(answer))
+        main(["run", f"task {answer}", "-w", str(tmp_path)], io=Term().io, provider_factory=make)
+    term = Term()
+    assert main(["usage", "-w", str(tmp_path), "-n", "1"], io=term.io) == EXIT_OK
+    lines = term.out.strip().splitlines()
+    assert len(lines) == 2
+    assert "task two" in lines[0]
+    assert "completed" in lines[0]
+    assert "1 tools" in lines[0]
+    assert lines[1].startswith("total: 1 runs")
+
+
+def test_usage_command_without_runs(tmp_path: Path) -> None:
+    term = Term()
+    main(["usage", "-w", str(tmp_path)], io=term.io)
+    assert "no runs recorded yet" in term.out
