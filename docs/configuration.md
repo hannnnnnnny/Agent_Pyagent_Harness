@@ -80,6 +80,8 @@ Use `pyagent policy "<command>"` to see how a command would be treated.
 Even when enabled, requests to private, loopback, link-local, and cloud
 metadata addresses are refused, every redirect is re-checked, and `web_fetch`
 is a network-risk tool, so it asks for approval in `ask` and `auto-edit` modes.
+Without `allow_domains`, every fetch needs approval, which means `unattended`
+runs cannot fetch at all; set an allowlist for unattended use.
 
 ## Example
 

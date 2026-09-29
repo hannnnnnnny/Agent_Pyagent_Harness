@@ -75,6 +75,9 @@ allowlisted.
   still verifies the certificate against the hostname;
 - each redirect hop is re-validated, redirects are capped, only text content
   types are read, and bodies are size-limited.
+- without a domain allowlist every fetch needs human approval, because any URL
+  can carry data out in its path or query string; unattended runs can only
+  fetch allowlisted domains.
 
 ## Layer 4: approval modes and the safety gate
 
