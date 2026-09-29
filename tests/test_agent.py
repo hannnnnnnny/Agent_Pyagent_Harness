@@ -195,3 +195,16 @@ def test_run_finished_reports_usage(tmp_path: Path) -> None:
     assert finished["usage"]["input_tokens"] == 3
     assert finished["usage"]["output_tokens"] == 4
     assert finished["cost_usd"] is None
+
+
+def test_tool_output_limit_is_applied(tmp_path: Path) -> None:
+    (tmp_path / "big.txt").write_text("x" * 5000)
+    agent = make_agent(
+        tmp_path,
+        [tool_turn(("read_file", {"path": "big.txt"})), text_turn("ok")],
+        max_tool_output_chars=300,
+    )
+    agent.run("read it")
+    result = agent.conversation.messages[2]["content"][0]["content"]
+    assert len(result) <= 300
+    assert "characters truncated" in result

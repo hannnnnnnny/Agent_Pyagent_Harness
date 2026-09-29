@@ -15,7 +15,7 @@ from pyagent.messages import Conversation, ModelResponse, ToolResult
 from pyagent.prompts import DEFAULT_SYSTEM_PROMPT
 from pyagent.providers.base import ModelRequest, Provider
 from pyagent.tools.base import ToolContext
-from pyagent.tools.executor import Gate, OutputFilter, ToolExecutor
+from pyagent.tools.executor import DEFAULT_MAX_OUTPUT_CHARS, Gate, OutputFilter, ToolExecutor
 from pyagent.tools.registry import ToolRegistry
 from pyagent.usage import Usage
 
@@ -57,6 +57,7 @@ class Agent:
         events: EventBus | None = None,
         conversation: Conversation | None = None,
         dispatcher_options: dict[str, Any] | None = None,
+        max_tool_output_chars: int = DEFAULT_MAX_OUTPUT_CHARS,
     ) -> None:
         self.provider = provider
         self.tools = tools
@@ -64,7 +65,13 @@ class Agent:
         self.budget = budget or Budget()
         self.events = events or EventBus()
         self.conversation = conversation or Conversation()
-        self.executor = ToolExecutor(tools, ctx, gates=gates, output_filters=output_filters)
+        self.executor = ToolExecutor(
+            tools,
+            ctx,
+            gates=gates,
+            output_filters=output_filters,
+            max_output_chars=max_tool_output_chars,
+        )
         self.dispatcher = Dispatcher(self.executor, self.events, **(dispatcher_options or {}))
         self._cancelled = threading.Event()
 
