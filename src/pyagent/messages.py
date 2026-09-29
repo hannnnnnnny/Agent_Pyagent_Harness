@@ -7,6 +7,7 @@ preserved thinking blocks, so the conversation is append-only by design.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -99,3 +100,16 @@ class Conversation:
     @property
     def last_role(self) -> str | None:
         return self._messages[-1]["role"] if self._messages else None
+
+    def to_json(self) -> str:
+        return json.dumps(self._messages, ensure_ascii=False)
+
+    @classmethod
+    def from_json(cls, data: str) -> Conversation:
+        messages = json.loads(data)
+        if not isinstance(messages, list) or not all(
+            isinstance(m, dict) and m.get("role") in {"user", "assistant", "system"}
+            for m in messages
+        ):
+            raise ValueError("conversation JSON must be a list of role-tagged messages")
+        return cls(messages)
