@@ -1,7 +1,8 @@
 import io
+import json
 
 from pyagent.agent import RunResult
-from pyagent.cli.render import ConsoleRenderer, format_result
+from pyagent.cli.render import ConsoleRenderer, format_result, result_to_dict
 from pyagent.events import EventBus
 from pyagent.usage import Usage
 
@@ -65,3 +66,23 @@ def test_format_result() -> None:
 def test_format_result_with_detail_and_no_text() -> None:
     result = RunResult("", "budget", 2, Usage(), detail="reached the limit of 2 turns")
     assert format_result(result) == "[budget] 2 turns, 0 tokens - reached the limit of 2 turns"
+
+
+def test_result_to_dict_is_json_serializable() -> None:
+    result = RunResult("Done", "completed", 2, Usage(10, 5), cost_usd=0.5, detail="")
+    data = result_to_dict(result, "abc123abc123")
+    assert json.loads(json.dumps(data)) == {
+        "stop": "completed",
+        "ok": True,
+        "text": "Done",
+        "turns": 2,
+        "usage": {
+            "input_tokens": 10,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 0,
+        },
+        "cost_usd": 0.5,
+        "detail": "",
+        "session": "abc123abc123",
+    }
