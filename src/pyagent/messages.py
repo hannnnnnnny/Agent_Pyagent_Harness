@@ -20,3 +20,22 @@ class ToolCall:
     id: str
     name: str
     input: JSON = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class ToolResult:
+    """The outcome of executing a :class:`ToolCall`."""
+
+    tool_use_id: str
+    content: str
+    is_error: bool = False
+
+    def to_block(self) -> JSON:
+        block: JSON = {
+            "type": "tool_result",
+            "tool_use_id": self.tool_use_id,
+            "content": self.content,
+        }
+        if self.is_error:
+            block["is_error"] = True
+        return block
