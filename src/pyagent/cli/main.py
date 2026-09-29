@@ -12,7 +12,7 @@ from typing import Any, TextIO
 
 from pyagent import __version__
 from pyagent.agent import Agent, RunResult
-from pyagent.cli.render import ConsoleRenderer, format_result
+from pyagent.cli.render import ConsoleRenderer, format_result, result_to_dict
 from pyagent.cli.starter import STARTER_CONFIG
 from pyagent.config import CONFIG_FILENAME, Config, load_config
 from pyagent.doctor import FAIL, run_checks
@@ -62,6 +62,9 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
     run = sub.add_parser("run", help="run one task and exit")
     run.add_argument("task", help="what the agent should do")
+    run.add_argument(
+        "--json", action="store_true", help="print one JSON result object; never prompts"
+    )
     _add_run_options(run)
     chat = sub.add_parser("chat", help="interactive multi-turn session")
     _add_run_options(chat)
@@ -117,6 +120,7 @@ class CliSession:
     id: str
     model: str
     title: str = ""
+    json_output: bool = False
 
     def run(self, task: str, io: IO) -> RunResult:
         self.title = self.title or task
@@ -126,7 +130,10 @@ class CliSession:
             self.agent.cancel()
             result = RunResult("", "cancelled", 0, Usage(), detail="interrupted by user")
         self.store.save(self.id, self.agent.conversation, title=self.title, model=self.model)
-        io.stdout.write(format_result(result) + f"\nsession: {self.id}\n")
+        if self.json_output:
+            io.stdout.write(json.dumps(result_to_dict(result, self.id), ensure_ascii=False) + "\n")
+        else:
+            io.stdout.write(format_result(result) + f"\nsession: {self.id}\n")
         return result
 
 
@@ -138,12 +145,17 @@ def _make_session(
     args: argparse.Namespace, config: Config, io: IO, provider_factory: ProviderFactory
 ) -> CliSession:
     store = _session_store(args.workspace)
-    approver = ConsoleApprover(io.stdin, io.stdout) if io.interactive else deny_all
+    # JSON output must stay machine-readable, so it never shows prompts or progress.
+    json_output = getattr(args, "json", False)
+    interactive = io.interactive and not json_output
+    approver = ConsoleApprover(io.stdin, io.stdout) if interactive else deny_all
     options = options_from_config(config, approver, root=args.workspace)
     options.conversation = store.load(args.resume) if args.resume else None
-    options.events.subscribe(ConsoleRenderer(io.stdout, verbose=args.verbose))
+    if not json_output:
+        options.events.subscribe(ConsoleRenderer(io.stdout, verbose=args.verbose))
     agent = build_agent(args.workspace, provider_factory(config), options)
-    return CliSession(agent, store, args.resume or new_session_id(), config.model)
+    session_id = args.resume or new_session_id()
+    return CliSession(agent, store, session_id, config.model, json_output=json_output)
 
 
 def cmd_run(args: argparse.Namespace, config: Config, io: IO, factory: ProviderFactory) -> int:

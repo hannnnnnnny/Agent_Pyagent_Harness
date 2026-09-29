@@ -18,6 +18,7 @@ Run one task to completion and print the answer plus a summary line.
 | `--no-audit` | Do not write `.pyagent/audit.jsonl` |
 | `--resume SESSION` | Continue a saved session |
 | `-v, --verbose` | Show more of each tool's output |
+| `--json` | Print one JSON object (`stop`, `ok`, `text`, `turns`, `usage`, `cost_usd`, `detail`, `session`); never prompts and prints no progress |
 
 Approval prompts appear only when stdin is a terminal. In scripts and CI,
 anything that needs approval is denied; use `--mode unattended` to make that

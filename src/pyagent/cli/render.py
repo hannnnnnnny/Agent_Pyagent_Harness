@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import json
 from typing import Any, TextIO
 
@@ -62,3 +63,17 @@ def format_result(result: RunResult) -> str:
         summary += f" - {result.detail}"
     lines.append(summary)
     return "\n".join(lines)
+
+
+def result_to_dict(result: RunResult, session_id: str = "") -> dict[str, Any]:
+    """A stable, JSON-serializable view of a run for scripts and CI."""
+    return {
+        "stop": result.stop,
+        "ok": result.ok,
+        "text": result.text,
+        "turns": result.turns,
+        "usage": dataclasses.asdict(result.usage),
+        "cost_usd": result.cost_usd,
+        "detail": result.detail,
+        "session": session_id,
+    }
