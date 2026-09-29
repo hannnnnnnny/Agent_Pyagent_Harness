@@ -62,7 +62,7 @@ class Dispatcher:
         if self._is_repeat_loop(call):
             message = (
                 f"not run: this exact call was already made {self.max_identical_calls} times "
-                "in a row with the same result. Try a different approach."
+                "in a row with nothing else in between. Try a different approach."
             )
             return ToolResult(call.id, message, is_error=True)
         self.events.emit("tool_started", tool=call.name, input=call.input)
