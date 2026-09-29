@@ -110,3 +110,17 @@ def test_resolution_failures_are_policy_errors() -> None:
         resolve_public(parse_target("https://nope.invalid"), broken)
     with pytest.raises(PolicyViolation, match="did not resolve"):
         resolve_public(parse_target("https://empty.example"), _resolver())
+
+
+@pytest.mark.parametrize(
+    "host",
+    ["0177.0.0.1", "127.1", "2130706433", "0x7f000001", "0x7f.0.0.1", "010.0.0.1", "1.2.3.4.5"],
+)
+def test_non_canonical_numeric_hosts_are_rejected(host: str) -> None:
+    with pytest.raises(PolicyViolation, match="non-canonical numeric host"):
+        parse_target(f"http://{host}/")
+
+
+@pytest.mark.parametrize("host", ["93.184.216.34", "a1.example", "1e100.net", "cafe.be", "123.ai"])
+def test_ordinary_hosts_are_not_mistaken_for_numbers(host: str) -> None:
+    assert parse_target(f"http://{host}/").host == host

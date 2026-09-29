@@ -9,6 +9,7 @@ connections are pinned to the address that passed the check.
 from __future__ import annotations
 
 import ipaddress
+import re
 import socket
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -36,6 +37,26 @@ class Target:
         return self.host if self.port == default else f"{self.host}:{self.port}"
 
 
+_NUMERIC_LABEL = re.compile(r"(?:0[xX][0-9a-fA-F]*|[0-9]+)")
+
+
+def _is_ambiguous_numeric_host(host: str) -> bool:
+    """True for IPv4 spellings other than canonical dotted-quad.
+
+    Resolvers disagree about forms like ``0177.0.0.1`` (octal on Linux,
+    decimal on macOS), ``0x7f000001``, ``2130706433``, and ``127.1``. Refusing
+    them removes the parser differential instead of guessing which one applies.
+    """
+    labels = host.split(".")
+    if not all(_NUMERIC_LABEL.fullmatch(label) for label in labels):
+        return False
+    try:
+        ipaddress.IPv4Address(host)
+    except ValueError:
+        return True
+    return False
+
+
 def parse_target(url: str) -> Target:
     """Validate the shape of ``url`` without touching the network."""
     try:
@@ -51,6 +72,8 @@ def parse_target(url: str) -> Target:
     host = (parts.hostname or "").rstrip(".").lower()
     if not host:
         raise PolicyViolation("URL has no host")
+    if _is_ambiguous_numeric_host(host):
+        raise PolicyViolation(f"non-canonical numeric host {host!r}; use a dotted-quad address")
     path = parts.path or "/"
     if parts.query:
         path += "?" + parts.query
