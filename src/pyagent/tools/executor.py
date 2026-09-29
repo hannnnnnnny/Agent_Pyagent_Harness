@@ -20,6 +20,8 @@ logger = logging.getLogger(__name__)
 
 # Called after validation and before the tool runs. Raise SafetyError to block.
 Gate = Callable[[Tool, ToolCall], None]
+# Applied to every result (success or error) before it reaches the model.
+OutputFilter = Callable[[str], str]
 
 DEFAULT_MAX_OUTPUT_CHARS = 50_000
 
@@ -31,11 +33,13 @@ class ToolExecutor:
         ctx: ToolContext,
         gates: list[Gate] | None = None,
         max_output_chars: int = DEFAULT_MAX_OUTPUT_CHARS,
+        output_filters: list[OutputFilter] | None = None,
     ) -> None:
         self.registry = registry
         self.ctx = ctx
         self.gates = list(gates or [])
         self.max_output_chars = max_output_chars
+        self.output_filters = list(output_filters or [])
 
     def execute(self, call: ToolCall) -> ToolResult:
         tool = self.registry.get(call.name)
@@ -57,10 +61,16 @@ class ToolExecutor:
             # type reaches the model so internals and paths are not leaked.
             logger.exception("tool %s crashed", call.name)
             return self._error(call, "internal tool error; see local logs")
-        return ToolResult(call.id, truncate_middle(output, self.max_output_chars))
+        return ToolResult(call.id, self._finish(output))
 
     def _error(self, call: ToolCall, message: str) -> ToolResult:
-        return ToolResult(call.id, truncate_middle(message, self.max_output_chars), is_error=True)
+        return ToolResult(call.id, self._finish(message), is_error=True)
+
+    def _finish(self, text: str) -> str:
+        # Filter before truncating so a secret split by the elision marker still matches.
+        for output_filter in self.output_filters:
+            text = output_filter(text)
+        return truncate_middle(text, self.max_output_chars)
 
     def execute_all(self, calls: list[ToolCall]) -> list[ToolResult]:
         """Run calls in order; results line up one-to-one with ``calls``."""

@@ -13,9 +13,12 @@ from pyagent.safety.approval import (
     ScriptedApprover,
     deny_all,
 )
+from pyagent.safety.audit import AuditLog
 from pyagent.safety.command_policy import CommandPolicy
+from pyagent.safety.injection import make_injection_filter
 from pyagent.safety.modes import ApprovalMode
 from pyagent.safety.protected import ProtectedPaths
+from pyagent.safety.redact import Redactor
 from pyagent.safety.risk import Risk
 from pyagent.safety.verdict import Assessment, Verdict
 from pyagent.safety.workspace import Workspace
@@ -26,13 +29,16 @@ __all__ = [
     "ApprovalRequest",
     "Approver",
     "Assessment",
+    "AuditLog",
     "Choice",
     "CommandPolicy",
     "ConsoleApprover",
     "ProtectedPaths",
+    "Redactor",
     "Risk",
     "ScriptedApprover",
     "Verdict",
     "Workspace",
     "deny_all",
+    "make_injection_filter",
 ]
