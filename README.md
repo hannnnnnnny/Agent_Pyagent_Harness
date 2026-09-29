@@ -92,3 +92,14 @@ print(result.stop, result.text)
 `result.stop` is one of `completed`, `refused`, `max_tokens`, `budget`,
 `stuck`, `cancelled`, or `error`. See [`examples/`](examples/) for custom tools
 and an offline demo.
+
+## Documentation
+
+- [Architecture](docs/architecture.md): how a run flows through the system
+- [Security model](docs/security-model.md): what is protected, how, and the known limits
+- [Configuration](docs/configuration.md): every `pyagent.toml` setting
+- [Contributing](CONTRIBUTING.md) and [Security policy](SECURITY.md)
+
+## License
+
+MIT, see [LICENSE](LICENSE).
