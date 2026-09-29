@@ -37,3 +37,11 @@ class PolicyViolation(SafetyError):
 
 class ApprovalDenied(SafetyError):
     """Raised when a human (or approval policy) declines an action."""
+
+
+class BudgetExceeded(PyAgentError):
+    """Raised when a run exceeds its turn, token, or cost budget."""
+
+
+class ProviderError(PyAgentError):
+    """Raised when the model provider fails in a way the loop cannot recover from."""
