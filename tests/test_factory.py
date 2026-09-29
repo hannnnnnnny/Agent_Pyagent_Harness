@@ -139,3 +139,9 @@ def test_web_fetch_is_added_when_enabled() -> None:
     (tool,) = options_from_config(config).extra_tools
     assert tool.name == "web_fetch"
     assert tool.fetcher.allowed_domains == ("python.org",)  # type: ignore[attr-defined]
+
+
+def test_limits_flow_into_the_dispatcher(tmp_path: Path) -> None:
+    options = options_from_config(parse_config({"limits": {"max_calls_per_turn": 3}}))
+    agent = build_agent(tmp_path, ScriptedProvider([]), options)
+    assert agent.dispatcher.max_calls_per_turn == 3

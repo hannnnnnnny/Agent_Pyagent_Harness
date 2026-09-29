@@ -6,6 +6,7 @@ import os
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from pyagent.agent import Agent
 from pyagent.budget import Budget
@@ -47,6 +48,7 @@ class AgentOptions:
     audit: bool = True
     events: EventBus = field(default_factory=EventBus)
     conversation: Conversation | None = None
+    dispatcher_options: dict[str, Any] = field(default_factory=dict)
 
 
 def build_agent(root: Path | str, provider: Provider, options: AgentOptions | None = None) -> Agent:
@@ -74,6 +76,7 @@ def build_agent(root: Path | str, provider: Provider, options: AgentOptions | No
         budget=opts.budget,
         events=opts.events,
         conversation=opts.conversation,
+        dispatcher_options=opts.dispatcher_options,
     )
 
 
@@ -116,6 +119,11 @@ def options_from_config(config: Config, approver: Approver = deny_all) -> AgentO
         instructions=config.instructions,
         audit=config.audit,
         extra_tools=_network_tools(config),
+        dispatcher_options={
+            "max_calls_per_turn": config.max_calls_per_turn,
+            "max_identical_calls": config.max_identical_calls,
+            "parallel_reads": config.parallel_reads,
+        },
     )
 
 
