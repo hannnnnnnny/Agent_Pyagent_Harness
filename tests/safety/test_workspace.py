@@ -71,6 +71,24 @@ def test_relative_display_uses_forward_slashes(ws: Workspace) -> None:
     assert ws.relative(ws.root) == "."
 
 
+def test_read_resolution_applies_protected_rules(ws: Workspace) -> None:
+    assert ws.resolve_for_read("src/a.py") == ws.root / "src" / "a.py"
+    with pytest.raises(SandboxViolation, match="blocked by rule"):
+        ws.resolve_for_read("config/../.env")
+
+
+def test_write_resolution_applies_protected_rules(ws: Workspace) -> None:
+    with pytest.raises(SandboxViolation, match="blocked by rule"):
+        ws.resolve_for_write(".git/hooks/post-checkout")
+
+
+def test_symlink_to_protected_file_is_blocked(ws: Workspace) -> None:
+    (ws.root / ".env").write_text("TOKEN=x")
+    _symlink(ws.root / "innocent.txt", ws.root / ".env")
+    with pytest.raises(SandboxViolation):
+        ws.resolve_for_read("innocent.txt")
+
+
 @pytest.mark.skipif(os.name != "nt", reason="case-insensitive filesystems only")
 def test_case_variant_of_root_is_inside(ws: Workspace) -> None:
     upper = str(ws.root).upper()
