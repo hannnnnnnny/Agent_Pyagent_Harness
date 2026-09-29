@@ -93,3 +93,20 @@ def test_invalid_config_is_rejected(data: dict[str, Any], message: str) -> None:
 
 def test_integer_cost_is_accepted() -> None:
     assert parse_config({"budget": {"max_cost_usd": 3}}).max_cost_usd == 3.0
+
+
+def test_limits_section() -> None:
+    config = parse_config(
+        {"limits": {"max_calls_per_turn": 5, "max_identical_calls": 2, "parallel_reads": False}}
+    )
+    assert (config.max_calls_per_turn, config.max_identical_calls) == (5, 2)
+    assert config.parallel_reads is False
+
+
+@pytest.mark.parametrize(
+    "limits",
+    [{"max_calls_per_turn": 0}, {"max_identical_calls": 1.5}, {"parallel_reads": 1}],
+)
+def test_invalid_limits(limits: dict[str, Any]) -> None:
+    with pytest.raises(ConfigError):
+        parse_config({"limits": limits})

@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from pyagent.dispatch import DEFAULT_MAX_CALLS_PER_TURN, DEFAULT_MAX_IDENTICAL_CALLS
 from pyagent.errors import ConfigError
 from pyagent.providers.anthropic import (
     DEFAULT_EFFORT,
@@ -45,16 +46,20 @@ class Config:
     audit: bool = True
     network_enabled: bool = False
     network_allow: tuple[str, ...] = ()
+    max_calls_per_turn: int = DEFAULT_MAX_CALLS_PER_TURN
+    max_identical_calls: int = DEFAULT_MAX_IDENTICAL_CALLS
+    parallel_reads: bool = True
     source: Path | None = field(default=None, compare=False)
 
 
 _SCHEMA: dict[str, set[str]] = {
-    "": {"instructions", "model", "safety", "shell", "budget", "network"},
+    "": {"instructions", "model", "safety", "shell", "budget", "network", "limits"},
     "model": {"name", "effort", "max_tokens"},
     "safety": {"mode", "protect", "unprotect", "audit"},
     "shell": {"allow", "block"},
     "budget": {"max_turns", "max_cost_usd", "max_total_tokens"},
     "network": {"enabled", "allow_domains"},
+    "limits": {"max_calls_per_turn", "max_identical_calls", "parallel_reads"},
 }
 
 
@@ -150,6 +155,16 @@ def _network_fields(section: dict[str, Any]) -> dict[str, Any]:
     return fields
 
 
+def _limits_fields(section: dict[str, Any]) -> dict[str, Any]:
+    fields: dict[str, Any] = {}
+    for key in ("max_calls_per_turn", "max_identical_calls"):
+        if key in section:
+            fields[key] = int(_positive(_expect(section[key], int, f"limits.{key}"), key))
+    if "parallel_reads" in section:
+        fields["parallel_reads"] = _expect(section["parallel_reads"], bool, "limits.parallel_reads")
+    return fields
+
+
 def parse_config(data: dict[str, Any], source: Path | None = None) -> Config:
     _check_keys(data, "")
     fields: dict[str, Any] = {}
@@ -158,6 +173,7 @@ def parse_config(data: dict[str, Any], source: Path | None = None) -> Config:
     fields.update(_shell_fields(_section(data, "shell")))
     fields.update(_budget_fields(_section(data, "budget")))
     fields.update(_network_fields(_section(data, "network")))
+    fields.update(_limits_fields(_section(data, "limits")))
     if "instructions" in data:
         fields["instructions"] = _expect(data["instructions"], str, "instructions")
     return Config(**fields, source=source)
