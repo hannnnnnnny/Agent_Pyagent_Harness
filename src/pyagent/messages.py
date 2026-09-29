@@ -39,3 +39,28 @@ class ToolResult:
         if self.is_error:
             block["is_error"] = True
         return block
+
+
+@dataclass(frozen=True)
+class ModelResponse:
+    """One assistant turn returned by a provider.
+
+    ``content`` holds the raw wire-shaped blocks, including opaque thinking
+    blocks, so the turn can be appended to history unchanged.
+    """
+
+    content: list[JSON]
+    stop_reason: str | None
+    model: str = ""
+
+    @property
+    def text(self) -> str:
+        return "".join(b.get("text", "") for b in self.content if b.get("type") == "text")
+
+    @property
+    def tool_calls(self) -> list[ToolCall]:
+        return [
+            ToolCall(id=b["id"], name=b["name"], input=dict(b.get("input") or {}))
+            for b in self.content
+            if b.get("type") == "tool_use"
+        ]
