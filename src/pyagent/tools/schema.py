@@ -28,3 +28,17 @@ def _check_type(value: Any, expected: str, path: str) -> None:
         raise ToolInputError(f"{path}: expected {expected}, got boolean")
     if not isinstance(value, _TYPES[expected]):
         raise ToolInputError(f"{path}: expected {expected}, got {type(value).__name__}")
+
+
+def _check_string(value: str, schema: dict[str, Any], path: str) -> None:
+    if "minLength" in schema and len(value) < schema["minLength"]:
+        raise ToolInputError(f"{path}: shorter than {schema['minLength']} characters")
+    if "maxLength" in schema and len(value) > schema["maxLength"]:
+        raise ToolInputError(f"{path}: longer than {schema['maxLength']} characters")
+
+
+def _check_number(value: float, schema: dict[str, Any], path: str) -> None:
+    if "minimum" in schema and value < schema["minimum"]:
+        raise ToolInputError(f"{path}: must be >= {schema['minimum']}")
+    if "maximum" in schema and value > schema["maximum"]:
+        raise ToolInputError(f"{path}: must be <= {schema['maximum']}")
