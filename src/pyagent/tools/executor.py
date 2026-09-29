@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 
-from pyagent.errors import SafetyError, ToolError, ToolInputError
+from pyagent.errors import ApprovalDenied, SafetyError, ToolError, ToolInputError
 from pyagent.messages import ToolCall, ToolResult
 from pyagent.text import truncate_middle
 from pyagent.tools.base import Tool, ToolContext
@@ -24,6 +24,22 @@ Gate = Callable[[Tool, ToolCall], None]
 OutputFilter = Callable[[str], str]
 
 DEFAULT_MAX_OUTPUT_CHARS = 50_000
+
+
+def _describe_failure(call: ToolCall, exc: Exception) -> str:
+    """The message the model sees for a failed call."""
+    if isinstance(exc, ToolInputError):
+        return f"invalid input: {exc}"
+    if isinstance(exc, ApprovalDenied):
+        return f"not approved: {exc}"
+    if isinstance(exc, SafetyError):
+        return f"blocked by safety policy: {exc}"
+    if isinstance(exc, ToolError):
+        return str(exc)
+    # Unexpected bugs are logged in full locally, but only a generic message
+    # reaches the model so internals and paths are not leaked.
+    logger.error("tool %s crashed", call.name, exc_info=exc)
+    return "internal tool error; see local logs"
 
 
 class ToolExecutor:
@@ -50,17 +66,8 @@ class ToolExecutor:
             for gate in self.gates:
                 gate(tool, call)
             output = tool.run(call.input, self.ctx)
-        except ToolInputError as exc:
-            return self._error(call, f"invalid input: {exc}")
-        except SafetyError as exc:
-            return self._error(call, f"blocked by safety policy: {exc}")
-        except ToolError as exc:
-            return self._error(call, str(exc))
-        except Exception:
-            # Unexpected bugs are logged in full locally, but only the exception
-            # type reaches the model so internals and paths are not leaked.
-            logger.exception("tool %s crashed", call.name)
-            return self._error(call, "internal tool error; see local logs")
+        except Exception as exc:
+            return self._error(call, _describe_failure(call, exc))
         return ToolResult(call.id, self._finish(output))
 
     def _error(self, call: ToolCall, message: str) -> ToolResult:

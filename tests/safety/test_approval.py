@@ -23,6 +23,7 @@ def test_deny_all() -> None:
     decision = deny_all(SHELL)
     assert not decision.approved
     assert decision.note
+    assert decision.by_user is False
 
 
 def test_scripted_approver_replays_then_denies() -> None:
