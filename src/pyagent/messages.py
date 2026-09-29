@@ -10,6 +10,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from pyagent.usage import Usage
+
 JSON = dict[str, Any]
 
 
@@ -52,6 +54,7 @@ class ModelResponse:
     content: list[JSON]
     stop_reason: str | None
     model: str = ""
+    usage: Usage = field(default_factory=Usage)
 
     @property
     def text(self) -> str:
