@@ -67,3 +67,31 @@ class ModelResponse:
             for b in self.content
             if b.get("type") == "tool_use"
         ]
+
+
+class Conversation:
+    """Append-only message history in Messages API shape."""
+
+    def __init__(self, messages: list[JSON] | None = None) -> None:
+        self._messages: list[JSON] = list(messages or [])
+
+    def __len__(self) -> int:
+        return len(self._messages)
+
+    @property
+    def messages(self) -> list[JSON]:
+        """A shallow copy; mutating it does not change the conversation."""
+        return list(self._messages)
+
+    def add_user_text(self, text: str) -> None:
+        self._messages.append({"role": "user", "content": [{"type": "text", "text": text}]})
+
+    def add_assistant(self, response: ModelResponse) -> None:
+        self._messages.append({"role": "assistant", "content": list(response.content)})
+
+    def add_tool_results(self, results: list[ToolResult]) -> None:
+        # All results for one assistant turn go in a single user message; splitting
+        # them discourages the model from making parallel tool calls.
+        if not results:
+            raise ValueError("at least one tool result is required")
+        self._messages.append({"role": "user", "content": [r.to_block() for r in results]})
