@@ -75,7 +75,7 @@ def test_gate_can_block_a_call(tmp_path: Path) -> None:
     executor = ToolExecutor(ToolRegistry([Echo()]), ToolContext.for_root(tmp_path), gates=[deny])
     result = executor.execute(ToolCall("1", "echo", {"text": "hi"}))
     assert result.is_error
-    assert "user said no" in result.content
+    assert result.content == "not approved: user said no"
     assert ran == ["echo"]
 
 
