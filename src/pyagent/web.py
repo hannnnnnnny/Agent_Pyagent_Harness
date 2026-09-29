@@ -74,7 +74,7 @@ class Fetcher:
 
     def fetch(self, url: str) -> FetchResult:
         for _ in range(self.max_redirects + 1):
-            target = self._check(url)
+            target = self.check_url(url)
             response, conn = self._request(target)
             try:
                 location = response.getheader("Location")
@@ -86,7 +86,8 @@ class Fetcher:
                 conn.close()
         raise ToolError(f"stopped after {self.max_redirects} redirects")
 
-    def _check(self, url: str) -> Target:
+    def check_url(self, url: str) -> Target:
+        """Validate a URL and the domain allowlist without any network access."""
         target = parse_target(url)
         if self.allowed_domains and not domain_allowed(target.host, self.allowed_domains):
             raise PolicyViolation(f"{target.host} is not in the allowed domain list")
