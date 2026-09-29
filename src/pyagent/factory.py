@@ -26,7 +26,9 @@ from pyagent.safety.redact import Redactor
 from pyagent.safety.workspace import Workspace
 from pyagent.tools.base import Tool, ToolContext
 from pyagent.tools.builtin import default_tools
+from pyagent.tools.builtin.web_fetch import WebFetch
 from pyagent.tools.registry import ToolRegistry
+from pyagent.web import Fetcher
 
 STATE_DIR = ".pyagent"
 
@@ -113,4 +115,11 @@ def options_from_config(config: Config, approver: Approver = deny_all) -> AgentO
         protected=protected_paths_from(config.protect, config.unprotect),
         instructions=config.instructions,
         audit=config.audit,
+        extra_tools=_network_tools(config),
     )
+
+
+def _network_tools(config: Config) -> list[Tool]:
+    if not config.network_enabled:
+        return []
+    return [WebFetch(Fetcher(allowed_domains=config.network_allow))]

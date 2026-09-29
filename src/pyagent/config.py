@@ -43,15 +43,18 @@ class Config:
     unprotect: tuple[str, ...] = ()
     instructions: str = ""
     audit: bool = True
+    network_enabled: bool = False
+    network_allow: tuple[str, ...] = ()
     source: Path | None = field(default=None, compare=False)
 
 
 _SCHEMA: dict[str, set[str]] = {
-    "": {"instructions", "model", "safety", "shell", "budget"},
+    "": {"instructions", "model", "safety", "shell", "budget", "network"},
     "model": {"name", "effort", "max_tokens"},
     "safety": {"mode", "protect", "unprotect", "audit"},
     "shell": {"allow", "block"},
     "budget": {"max_turns", "max_cost_usd", "max_total_tokens"},
+    "network": {"enabled", "allow_domains"},
 }
 
 
@@ -138,6 +141,15 @@ def _budget_fields(section: dict[str, Any]) -> dict[str, Any]:
     return fields
 
 
+def _network_fields(section: dict[str, Any]) -> dict[str, Any]:
+    fields: dict[str, Any] = {}
+    if "enabled" in section:
+        fields["network_enabled"] = _expect(section["enabled"], bool, "network.enabled")
+    if "allow_domains" in section:
+        fields["network_allow"] = _strings(section["allow_domains"], "network.allow_domains")
+    return fields
+
+
 def parse_config(data: dict[str, Any], source: Path | None = None) -> Config:
     _check_keys(data, "")
     fields: dict[str, Any] = {}
@@ -145,6 +157,7 @@ def parse_config(data: dict[str, Any], source: Path | None = None) -> Config:
     fields.update(_safety_fields(_section(data, "safety")))
     fields.update(_shell_fields(_section(data, "shell")))
     fields.update(_budget_fields(_section(data, "budget")))
+    fields.update(_network_fields(_section(data, "network")))
     if "instructions" in data:
         fields["instructions"] = _expect(data["instructions"], str, "instructions")
     return Config(**fields, source=source)

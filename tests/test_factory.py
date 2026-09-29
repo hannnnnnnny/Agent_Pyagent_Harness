@@ -128,3 +128,14 @@ def test_resumed_conversation_is_continued(tmp_path: Path) -> None:
     build_agent(tmp_path, provider, AgentOptions(conversation=earlier)).run("who am I?")
     assert len(provider.requests[0].messages) == 3
     assert "Ada" in str(provider.requests[0].messages[0])
+
+
+def test_web_fetch_is_off_by_default() -> None:
+    assert options_from_config(parse_config({})).extra_tools == []
+
+
+def test_web_fetch_is_added_when_enabled() -> None:
+    config = parse_config({"network": {"enabled": True, "allow_domains": ["python.org"]}})
+    (tool,) = options_from_config(config).extra_tools
+    assert tool.name == "web_fetch"
+    assert tool.fetcher.allowed_domains == ("python.org",)  # type: ignore[attr-defined]

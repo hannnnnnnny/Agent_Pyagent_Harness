@@ -28,4 +28,10 @@ block = []
 [budget]
 max_turns = 50
 # max_cost_usd = 5.0
+
+[network]
+# Enables the web_fetch tool. Private, local, and metadata addresses are never reachable.
+enabled = false
+# Optional: only these domains (and their subdomains) may be fetched.
+allow_domains = []
 """
