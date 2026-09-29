@@ -8,12 +8,12 @@ your machine: a path sandbox, a shell command policy, approval modes, secret
 redaction, prompt-injection flagging, budgets, and an audit log.
 
 ```text
-you â”€â”€taskâ”€â”€â–¶ Agent loop â”€â”€requestâ”€â”€â–¶ Claude
-                 â–²   â”‚
-        results  â”‚   â–¼ tool calls
-                 â”‚  ToolExecutor â”€â”€â–¶ validate â”€â–¶ SafetyGate â”€â–¶ tool â”€â–¶ redact / flag â”€â–¶ result
-                 â”‚                                   â”‚
-                 â””â”€â”€â”€â”€â”€â”€â”€â”€ events â”€â”€â–¶ audit log, console
+you ──task──▶ Agent loop ──request──▶ Claude
+                 ▲   │
+        results  │   ▼ tool calls
+                 │  ToolExecutor ──▶ validate ─▶ SafetyGate ─▶ tool ─▶ redact / flag ─▶ result
+                 │                                   │
+                 └──────── events ──▶ audit log, console
 ```
 
 ## Install
@@ -53,7 +53,7 @@ When the agent wants to do something risky it asks first:
 | `unattended` | yes | yes | per command policy | per policy |
 
 In `unattended` mode nobody is there to answer, so anything that would need
-approval is **denied**. Actions the policy blocks (for example `sudo`, `curl â€¦ | sh`,
+approval is **denied**. Actions the policy blocks (for example `sudo`, `curl … | sh`,
 or reading `.env`) can never be approved in any mode.
 
 ## Built-in tools

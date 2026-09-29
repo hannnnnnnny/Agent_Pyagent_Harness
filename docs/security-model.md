@@ -45,7 +45,7 @@ Every segment gets a verdict and the strictest one wins:
 
 - **Block** (cannot be approved): privilege escalation (`sudo`, `su`, ...),
   system administration, `mkfs`/raw `dd`, recursive deletion or chmod of `/`,
-  `~`, or the workspace; download-and-execute pipelines (`curl â€¦ | sh`);
+  `~`, or the workspace; download-and-execute pipelines (`curl … | sh`);
   redirects that leave the workspace or hit protected files; arguments that
   name protected files (`cat .env`, `head ~/.ssh/id_rsa`); unparseable input.
 - **Ask**: network tools, git operations that touch remotes or discard work,

@@ -47,19 +47,19 @@ import cycles cannot creep back in.
 
 ```text
 ToolCall
-  â”‚
-  â”œâ”€ unknown tool? â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ error result
-  â”œâ”€ validate input against the tool's JSON schema â–¶ error result on failure
-  â”œâ”€ gates (SafetyGate)
-  â”‚    strictest(mode Ã— risk, tool.assess(args))
-  â”‚      BLOCK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ error result (never approvable)
-  â”‚      ASK   â”€â–¶ approver â”€ deny â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ error result (+ user's note)
-  â”‚      ALLOW
-  â”œâ”€ tool.run(args, ctx)
-  â”‚    ToolError â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ error result (message shown)
-  â”‚    unexpected exception â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ generic error (details logged locally)
-  â”œâ”€ output filters: secret redaction, injection flagging
-  â””â”€ middle truncation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ ToolResult
+  │
+  ├─ unknown tool? ───────────────────────────────▶ error result
+  ├─ validate input against the tool's JSON schema ▶ error result on failure
+  ├─ gates (SafetyGate)
+  │    strictest(mode × risk, tool.assess(args))
+  │      BLOCK ─────────────────────────────────▶ error result (never approvable)
+  │      ASK   ─▶ approver ─ deny ─────────────▶ error result (+ user's note)
+  │      ALLOW
+  ├─ tool.run(args, ctx)
+  │    ToolError ────────────────────────────────▶ error result (message shown)
+  │    unexpected exception ─────────────────────▶ generic error (details logged locally)
+  ├─ output filters: secret redaction, injection flagging
+  └─ middle truncation ────────────────────────────▶ ToolResult
 ```
 
 Nothing a tool does can crash the loop: every failure becomes an `is_error`
