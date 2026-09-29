@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 import os
 from collections.abc import Iterable
 from dataclasses import dataclass, field
@@ -10,7 +11,7 @@ from pathlib import Path
 from pyagent.errors import SafetyError
 from pyagent.safety.command_rules import ask_rules, block_rules, effective_argv, program_name
 from pyagent.safety.shell_parse import ParsedCommand, ShellParseError, parse_command
-from pyagent.safety.verdict import Assessment, strictest
+from pyagent.safety.verdict import Assessment, Verdict, strictest
 from pyagent.safety.workspace import Workspace
 
 # Read-only inspection commands that run without approval by default.
@@ -47,6 +48,8 @@ _INTERPRETERS = frozenset(
     {"sh", "bash", "zsh", "dash", "fish", "python", "python3", "perl", "ruby", "node", "pwsh"}
 )
 _DOWNLOADERS = frozenset({"curl", "wget", "iwr", "invoke-webrequest"})
+_GLOB_CHARS = frozenset("*?[")
+MAX_GLOB_MATCHES = 1000
 
 
 @dataclass(frozen=True)
@@ -119,24 +122,64 @@ def _argument_rules(argv: list[str], workspace: Workspace) -> Assessment:
     for arg in argv[1:]:
         if arg.startswith("-") or "://" in arg or "=" in arg:
             continue
-        # Match the text itself too, so "~/.ssh/id_rsa" is caught outside the workspace.
-        try:
-            workspace.protected.check_read(arg.replace("\\", "/").lstrip("~/"))
-        except SafetyError as exc:
-            return Assessment.block(f"argument {arg!r} names a protected file: {exc}")
-        try:
-            resolved = Path(os.path.expanduser(arg))
-            if not resolved.is_absolute():
-                resolved = workspace.root / resolved
-            resolved = resolved.resolve()
-        except (OSError, ValueError, RuntimeError):
-            continue
-        if not workspace.contains(resolved):
-            return Assessment.ask(f"argument {arg!r} is outside the workspace")
-        try:
-            workspace.protected.check_read(workspace.relative(resolved))
-        except SafetyError as exc:
-            return Assessment.block(f"argument {arg!r} names a protected file: {exc}")
+        result = _assess_argument(arg, workspace)
+        if result.verdict is not Verdict.ALLOW:
+            return result
+    return Assessment.allow()
+
+
+def _protected(rel_path: str, workspace: Workspace) -> str | None:
+    try:
+        workspace.protected.check_read(rel_path)
+    except SafetyError as exc:
+        return str(exc)
+    return None
+
+
+def _assess_argument(arg: str, workspace: Workspace) -> Assessment:
+    # Match the text itself too, so "~/.ssh/id_rsa" is caught outside the workspace.
+    reason = _protected(arg.replace("\\", "/").lstrip("~/"), workspace)
+    if reason:
+        return Assessment.block(f"argument {arg!r} names a protected file: {reason}")
+    if "$" in arg:
+        return Assessment.ask(f"argument {arg!r} uses shell variables the policy cannot see")
+    if _GLOB_CHARS.intersection(arg):
+        return _assess_glob(arg, workspace)
+    try:
+        resolved = Path(os.path.expanduser(arg))
+        if not resolved.is_absolute():
+            resolved = workspace.root / resolved
+        resolved = resolved.resolve()
+    except (OSError, ValueError, RuntimeError):
+        return Assessment.allow()
+    return _assess_path(arg, resolved, workspace)
+
+
+def _assess_path(arg: str, resolved: Path, workspace: Workspace) -> Assessment:
+    if not workspace.contains(resolved):
+        return Assessment.ask(f"argument {arg!r} is outside the workspace")
+    reason = _protected(workspace.relative(resolved), workspace)
+    if reason:
+        return Assessment.block(f"argument {arg!r} names a protected file: {reason}")
+    return Assessment.allow()
+
+
+def _assess_glob(arg: str, workspace: Workspace) -> Assessment:
+    """Expand a glob the way the shell will, and judge every match.
+
+    Python's glob also matches dotfiles, which errs on the side of blocking.
+    """
+    pattern = arg.replace("\\", "/")
+    if pattern.startswith(("/", "~")) or ".." in pattern.split("/") or ":" in pattern:
+        return Assessment.ask(f"glob {arg!r} may expand outside the workspace")
+    try:
+        matches = list(itertools.islice(workspace.root.glob(pattern), MAX_GLOB_MATCHES))
+    except (OSError, ValueError, NotImplementedError):
+        return Assessment.ask(f"glob {arg!r} could not be checked")
+    for match in matches:
+        result = _assess_path(arg, match.resolve(), workspace)
+        if result.verdict is not Verdict.ALLOW:
+            return result
     return Assessment.allow()
 
 
