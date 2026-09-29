@@ -55,3 +55,15 @@ When the agent wants to do something risky it asks first:
 In `unattended` mode nobody is there to answer, so anything that would need
 approval is **denied**. Actions the policy blocks (for example `sudo`, `curl … | sh`,
 or reading `.env`) can never be approved in any mode.
+
+## Built-in tools
+
+| Tool | Risk | What it does |
+|---|---|---|
+| `read_file` | read | Line-numbered file view with paging |
+| `list_dir` | read | Directory listing (protected entries hidden) |
+| `glob` | read | Find files by pattern, e.g. `**/*.py` |
+| `grep` | read | Regex or literal search across files |
+| `write_file` | write | Create or replace a file (atomic, size-limited) |
+| `edit_file` | write | Exact, unique string replacement |
+| `run_shell` | execute | Policy-checked shell command with a scrubbed environment |
