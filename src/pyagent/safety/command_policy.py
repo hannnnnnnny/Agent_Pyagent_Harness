@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import Iterable
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from pyagent.errors import SafetyError
 from pyagent.safety.command_rules import ask_rules, block_rules, effective_argv, program_name
@@ -67,7 +69,9 @@ class CommandPolicy:
             return Assessment.block(f"could not parse command: {exc}")
         if not parsed.segments:
             return Assessment.block("empty command")
-        results = [self._assess_segment(effective_argv(seg)) for seg in parsed.segments]
+        argvs = [effective_argv(seg) for seg in parsed.segments]
+        results = [self._assess_segment(argv) for argv in argvs]
+        results.extend(_argument_rules(argv, workspace) for argv in argvs if argv)
         results.append(_pipeline_rules(parsed))
         results.append(_redirect_rules(parsed, workspace))
         if parsed.has_substitution:
@@ -103,6 +107,36 @@ def _pipeline_rules(parsed: ParsedCommand) -> Assessment:
     programs = {program_name(p) for p in parsed.programs}
     if programs & _DOWNLOADERS and programs & _INTERPRETERS:
         return Assessment.block("downloading and executing code in one command")
+    return Assessment.allow()
+
+
+def _argument_rules(argv: list[str], workspace: Workspace) -> Assessment:
+    """Flag arguments naming protected files or locations outside the workspace.
+
+    Shell globbing and variables can still smuggle paths past this check, which
+    is why shell access also relies on approvals and a scrubbed environment.
+    """
+    for arg in argv[1:]:
+        if arg.startswith("-") or "://" in arg or "=" in arg:
+            continue
+        # Match the text itself too, so "~/.ssh/id_rsa" is caught outside the workspace.
+        try:
+            workspace.protected.check_read(arg.replace("\\", "/").lstrip("~/"))
+        except SafetyError as exc:
+            return Assessment.block(f"argument {arg!r} names a protected file: {exc}")
+        try:
+            resolved = Path(os.path.expanduser(arg))
+            if not resolved.is_absolute():
+                resolved = workspace.root / resolved
+            resolved = resolved.resolve()
+        except (OSError, ValueError, RuntimeError):
+            continue
+        if not workspace.contains(resolved):
+            return Assessment.ask(f"argument {arg!r} is outside the workspace")
+        try:
+            workspace.protected.check_read(workspace.relative(resolved))
+        except SafetyError as exc:
+            return Assessment.block(f"argument {arg!r} names a protected file: {exc}")
     return Assessment.allow()
 
 
