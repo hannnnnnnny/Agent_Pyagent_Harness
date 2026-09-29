@@ -120,12 +120,24 @@ def _argument_rules(argv: list[str], workspace: Workspace) -> Assessment:
     is why shell access also relies on approvals and a scrubbed environment.
     """
     for arg in argv[1:]:
-        if arg.startswith("-") or "://" in arg or "=" in arg:
-            continue
-        result = _assess_argument(arg, workspace)
-        if result.verdict is not Verdict.ALLOW:
-            return result
+        for candidate in _path_candidates(arg):
+            result = _assess_argument(candidate, workspace)
+            if result.verdict is not Verdict.ALLOW:
+                return result
     return Assessment.allow()
+
+
+def _path_candidates(arg: str) -> list[str]:
+    """Strings within an argument that a program may treat as a file path.
+
+    Covers ``--file=x``, ``key=x``, and curl/httpie-style ``@x`` file
+    references (``-d @.env``, ``-F f=@.env``), which would otherwise hide a
+    path behind a flag or assignment.
+    """
+    candidates = [arg.split("=", 1)[1]] if "=" in arg else [] if arg.startswith("-") else [arg]
+    # "name@path" (httpie) also references a file after the "@".
+    candidates += [c.split("@", 1)[1] for c in candidates if "@" in c.lstrip("@")]
+    return [c.removeprefix("@") for c in candidates if c and "://" not in c]
 
 
 def _protected(rel_path: str, workspace: Workspace) -> str | None:
