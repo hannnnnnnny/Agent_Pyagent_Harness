@@ -12,6 +12,7 @@ from pyagent.budget import Budget
 from pyagent.config import Config
 from pyagent.errors import ConfigError
 from pyagent.events import EventBus
+from pyagent.messages import Conversation
 from pyagent.prompts import build_system_prompt
 from pyagent.providers.base import Provider
 from pyagent.safety.approval import Approver, deny_all
@@ -43,6 +44,7 @@ class AgentOptions:
     instructions: str = ""
     audit: bool = True
     events: EventBus = field(default_factory=EventBus)
+    conversation: Conversation | None = None
 
 
 def build_agent(root: Path | str, provider: Provider, options: AgentOptions | None = None) -> Agent:
@@ -69,6 +71,7 @@ def build_agent(root: Path | str, provider: Provider, options: AgentOptions | No
         system_prompt=build_system_prompt(opts.instructions),
         budget=opts.budget,
         events=opts.events,
+        conversation=opts.conversation,
     )
 
 
