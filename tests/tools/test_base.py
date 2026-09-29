@@ -3,6 +3,7 @@ from typing import Any
 
 import pytest
 
+from pyagent.safety.verdict import Verdict
 from pyagent.tools.base import Risk, Tool, ToolContext
 
 
@@ -34,6 +35,11 @@ def test_default_risk_is_read() -> None:
 
 def test_run_receives_context(tmp_path: Path) -> None:
     assert Echo().run({"text": "hi"}, ToolContext.for_root(tmp_path)) == "hi"
+
+
+def test_default_assessment_allows(tmp_path: Path) -> None:
+    assessment = Echo().assess({"text": "x"}, ToolContext.for_root(tmp_path))
+    assert assessment.verdict is Verdict.ALLOW
 
 
 def test_tool_is_abstract() -> None:
