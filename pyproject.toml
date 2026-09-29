@@ -15,6 +15,9 @@ dependencies = ["anthropic>=1.9", "tomli>=2.0; python_version < '3.11'"]
 [tool.hatch.build.targets.wheel]
 packages = ["src/pyagent"]
 
+[tool.hatch.build.targets.sdist]
+exclude = [".github", ".pre-commit-config.yaml"]
+
 [project.scripts]
 pyagent = "pyagent.cli.main:main"
 
