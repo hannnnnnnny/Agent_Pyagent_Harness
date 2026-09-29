@@ -103,6 +103,8 @@ and an offline demo.
 - [Architecture](docs/architecture.md): how a run flows through the system
 - [Security model](docs/security-model.md): what is protected, how, and the known limits
 - [Configuration](docs/configuration.md): every `pyagent.toml` setting
+- [CLI reference](docs/cli.md): every command and flag
+- [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md) and [Security policy](SECURITY.md)
 
 ## License
