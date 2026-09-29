@@ -1,4 +1,5 @@
 import io
+import json
 from pathlib import Path
 
 import pytest
@@ -241,3 +242,26 @@ def test_doctor_fails_on_bad_config(tmp_path: Path) -> None:
     term = Term()
     assert main(["doctor", "-w", str(tmp_path)], io=term.io) == EXIT_INCOMPLETE
     assert "[fail] config" in term.out
+
+
+def test_json_output_is_a_single_object(tmp_path: Path) -> None:
+    _, make = factory(tool_turn(("list_dir", {})), text_turn("All good."))
+    term = Term(stdin="y\n", interactive=True)
+    code = main(["run", "check", "-w", str(tmp_path), "--json"], io=term.io, provider_factory=make)
+    assert code == EXIT_OK
+    data = json.loads(term.out)
+    assert data["ok"] is True
+    assert data["text"] == "All good."
+    assert data["turns"] == 2
+    assert len(data["session"]) == 12
+
+
+def test_json_mode_never_prompts(tmp_path: Path) -> None:
+    _, make = factory(
+        tool_turn(("write_file", {"path": "a.txt", "content": "x"})), text_turn("skipped")
+    )
+    term = Term(stdin="y\n", interactive=True)
+    main(["run", "write", "-w", str(tmp_path), "--json"], io=term.io, provider_factory=make)
+    assert "approval needed" not in term.out
+    assert not (tmp_path / "a.txt").exists()
+    json.loads(term.out)
