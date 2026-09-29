@@ -6,6 +6,14 @@ All notable changes to pyagent are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- `pyagent doctor` checks Python, credentials (presence only), shell, config,
+  and workspace permissions.
+- `pyagent run --json` prints a single machine-readable result and never prompts.
+- `instructions_file` loads project guidance (e.g. `AGENTS.md`) through the sandbox.
+- `AgentOptions.extra_gates` for project-specific policy rules.
+- `limits.max_tool_output_chars` to tune how much tool output reaches the model.
+
 ## [0.1.0]
 
 First release: a safety-first agent harness for Claude.
