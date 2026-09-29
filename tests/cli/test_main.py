@@ -159,3 +159,51 @@ def test_non_positive_overrides_rejected(flags: list[str]) -> None:
     args = build_parser().parse_args(["run", "t", *flags])
     with pytest.raises(ConfigError, match="must be positive"):
         apply_overrides(Config(), args)
+
+
+def _session_id(output: str) -> str:
+    return output.strip().splitlines()[-1].removeprefix("session: ")
+
+
+def test_runs_are_saved_and_resumable(tmp_path: Path) -> None:
+    _, make = factory(text_turn("Noted, your name is Ada."))
+    term = Term()
+    main(["run", "my name is Ada", "-w", str(tmp_path)], io=term.io, provider_factory=make)
+    session_id = _session_id(term.out)
+
+    provider, make = factory(text_turn("You are Ada."))
+    term = Term()
+    main(
+        ["run", "who am I?", "-w", str(tmp_path), "--resume", session_id],
+        io=term.io,
+        provider_factory=make,
+    )
+    assert "my name is Ada" in str(provider.requests[0].messages)
+    assert _session_id(term.out) == session_id
+
+
+def test_sessions_command_lists_saved_sessions(tmp_path: Path) -> None:
+    _, make = factory(text_turn("ok"))
+    main(["run", "first task", "-w", str(tmp_path)], io=Term().io, provider_factory=make)
+    term = Term()
+    main(["sessions", "-w", str(tmp_path)], io=term.io)
+    assert "first task" in term.out
+    assert "2 msgs" in term.out
+
+
+def test_sessions_command_when_empty(tmp_path: Path) -> None:
+    term = Term()
+    main(["sessions", "-w", str(tmp_path)], io=term.io)
+    assert "no saved sessions" in term.out
+
+
+def test_resuming_unknown_session_is_a_usage_error(tmp_path: Path) -> None:
+    _, make = factory(text_turn("ok"))
+    term = Term()
+    code = main(
+        ["run", "x", "-w", str(tmp_path), "--resume", "0123456789ab"],
+        io=term.io,
+        provider_factory=make,
+    )
+    assert code == EXIT_USAGE
+    assert "no session" in term.err

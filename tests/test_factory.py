@@ -11,6 +11,7 @@ from pyagent.factory import (
     options_from_config,
     protected_paths_from,
 )
+from pyagent.messages import Conversation
 from pyagent.providers.scripted import ScriptedProvider, text_turn, tool_turn
 from pyagent.safety.approval import Choice, ScriptedApprover
 from pyagent.safety.audit import read_audit
@@ -117,3 +118,13 @@ def test_options_from_config() -> None:
 def test_state_and_git_can_never_be_unprotected(pattern: str) -> None:
     with pytest.raises(ConfigError, match="refusing to unprotect"):
         protected_paths_from((), (pattern,))
+
+
+def test_resumed_conversation_is_continued(tmp_path: Path) -> None:
+    earlier = Conversation()
+    earlier.add_user_text("my name is Ada")
+    earlier.add_assistant(text_turn("Nice to meet you, Ada."))
+    provider = ScriptedProvider([text_turn("You are Ada.")])
+    build_agent(tmp_path, provider, AgentOptions(conversation=earlier)).run("who am I?")
+    assert len(provider.requests[0].messages) == 3
+    assert "Ada" in str(provider.requests[0].messages[0])

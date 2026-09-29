@@ -24,6 +24,7 @@ from pyagent.safety.audit import read_audit
 from pyagent.safety.command_policy import CommandPolicy
 from pyagent.safety.modes import ApprovalMode
 from pyagent.safety.workspace import Workspace
+from pyagent.sessions import SessionStore, new_session_id
 from pyagent.usage import Usage
 
 EXIT_OK = 0
@@ -50,6 +51,7 @@ def _add_run_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--max-cost", type=float, help="stop after this many US dollars")
     parser.add_argument("--no-audit", action="store_true", help="do not write the audit log")
     parser.add_argument("-v", "--verbose", action="store_true", help="show more tool output")
+    parser.add_argument("--resume", metavar="SESSION", help="continue a saved session")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -67,6 +69,8 @@ def build_parser() -> argparse.ArgumentParser:
     audit = sub.add_parser("audit", help="print recent audit log entries")
     audit.add_argument("-n", "--tail", type=int, default=20)
     audit.add_argument("-w", "--workspace", type=Path, default=Path.cwd())
+    sessions = sub.add_parser("sessions", help="list saved sessions")
+    sessions.add_argument("-w", "--workspace", type=Path, default=Path.cwd())
     init = sub.add_parser("init", help="write a starter pyagent.toml")
     init.add_argument("-w", "--workspace", type=Path, default=Path.cwd())
     return parser
@@ -97,32 +101,51 @@ def default_provider(config: Config) -> Provider:
     return AnthropicProvider(config.model, max_tokens=config.max_tokens, effort=config.effort)
 
 
-def _make_agent(
+@dataclasses.dataclass
+class CliSession:
+    """An agent plus where its conversation is saved after every run."""
+
+    agent: Agent
+    store: SessionStore
+    id: str
+    model: str
+    title: str = ""
+
+    def run(self, task: str, io: IO) -> RunResult:
+        self.title = self.title or task
+        try:
+            result = self.agent.run(task)
+        except KeyboardInterrupt:
+            self.agent.cancel()
+            result = RunResult("", "cancelled", 0, Usage(), detail="interrupted by user")
+        self.store.save(self.id, self.agent.conversation, title=self.title, model=self.model)
+        io.stdout.write(format_result(result) + f"\nsession: {self.id}\n")
+        return result
+
+
+def _session_store(workspace: Path) -> SessionStore:
+    return SessionStore(workspace / STATE_DIR / "sessions")
+
+
+def _make_session(
     args: argparse.Namespace, config: Config, io: IO, provider_factory: ProviderFactory
-) -> Agent:
+) -> CliSession:
+    store = _session_store(args.workspace)
     approver = ConsoleApprover(io.stdin, io.stdout) if io.interactive else deny_all
     options = options_from_config(config, approver)
+    options.conversation = store.load(args.resume) if args.resume else None
     options.events.subscribe(ConsoleRenderer(io.stdout, verbose=args.verbose))
-    return build_agent(args.workspace, provider_factory(config), options)
-
-
-def _run_once(agent: Agent, task: str, io: IO) -> RunResult:
-    try:
-        result = agent.run(task)
-    except KeyboardInterrupt:
-        agent.cancel()
-        result = RunResult("", "cancelled", 0, Usage(), detail="interrupted by user")
-    io.stdout.write(format_result(result) + "\n")
-    return result
+    agent = build_agent(args.workspace, provider_factory(config), options)
+    return CliSession(agent, store, args.resume or new_session_id(), config.model)
 
 
 def cmd_run(args: argparse.Namespace, config: Config, io: IO, factory: ProviderFactory) -> int:
-    result = _run_once(_make_agent(args, config, io, factory), args.task, io)
+    result = _make_session(args, config, io, factory).run(args.task, io)
     return EXIT_OK if result.ok else EXIT_INCOMPLETE
 
 
 def cmd_chat(args: argparse.Namespace, config: Config, io: IO, factory: ProviderFactory) -> int:
-    agent = _make_agent(args, config, io, factory)
+    session = _make_session(args, config, io, factory)
     io.stdout.write("pyagent chat - type /exit to quit\n")
     while True:
         io.stdout.write("you> ")
@@ -131,7 +154,16 @@ def cmd_chat(args: argparse.Namespace, config: Config, io: IO, factory: Provider
         if not line or line.strip() in {"/exit", "/quit"}:
             return EXIT_OK
         if line.strip():
-            _run_once(agent, line.strip(), io)
+            session.run(line.strip(), io)
+
+
+def cmd_sessions(args: argparse.Namespace, io: IO) -> int:
+    infos = _session_store(args.workspace).list_sessions()
+    if not infos:
+        io.stdout.write("no saved sessions\n")
+    for info in infos:
+        io.stdout.write(f"{info.id}  {info.updated}  {info.messages:>4} msgs  {info.title[:60]}\n")
+    return EXIT_OK
 
 
 def cmd_policy(args: argparse.Namespace, config: Config, io: IO) -> int:
@@ -169,6 +201,8 @@ def _dispatch(args: argparse.Namespace, io: IO, factory: ProviderFactory) -> int
         return cmd_init(args, io)
     if args.command == "audit":
         return cmd_audit(args, io)
+    if args.command == "sessions":
+        return cmd_sessions(args, io)
     config = apply_overrides(load_config(args.workspace), args)
     if args.command == "policy":
         return cmd_policy(args, config, io)
