@@ -1,0 +1,16 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyagent"
+version = "0.1.0"
+description = "A powerful, safety-first agent harness for Claude."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Yi Han" }]
+dependencies = ["anthropic>=1.9"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pyagent"]
