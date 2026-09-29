@@ -104,6 +104,17 @@ The system prompt also tells the model that tool results are data, not instructi
 - Every event is written, redacted, to `.pyagent/audit.jsonl` (mode `0600` on
   POSIX). The agent cannot read or write this directory.
 
+## Adversarial test suite
+
+`tests/adversarial/` is a catalogue of known attacks that must keep failing:
+path escapes (traversal, absolute and drive-relative paths, device names,
+symlinks, case tricks), shell policy bypasses (wrappers, chaining,
+pipe-to-shell, globs and variables that expand to protected files, paths hidden
+in `--flag=value` and `@file` references), SSRF address forms (decimal, octal,
+hex, IPv4-mapped IPv6, metadata endpoints), end-to-end secret leakage, and a
+model that obeys injected instructions. New bypasses should be added there
+first, as failing tests.
+
 ## Known limitations
 
 - **The shell is not a sandbox.** The command policy is defence in depth.
