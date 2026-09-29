@@ -17,3 +17,9 @@ dist/
 # Coverage
 .coverage
 htmlcov/
+
+# Local agent state (sessions, audit logs, secrets)
+.pyagent/
+.env
+.env.*
+!.env.example
