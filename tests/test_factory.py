@@ -145,3 +145,16 @@ def test_limits_flow_into_the_dispatcher(tmp_path: Path) -> None:
     options = options_from_config(parse_config({"limits": {"max_calls_per_turn": 3}}))
     agent = build_agent(tmp_path, ScriptedProvider([]), options)
     assert agent.dispatcher.max_calls_per_turn == 3
+
+
+def test_instructions_file_is_appended(tmp_path: Path) -> None:
+    (tmp_path / "AGENTS.md").write_text("Always run the linter.")
+    config = parse_config({"instructions": "Be brief.", "instructions_file": "AGENTS.md"})
+    options = options_from_config(config, root=tmp_path)
+    assert options.instructions == "Be brief.\n\nAlways run the linter."
+
+
+def test_protected_instructions_file_is_a_config_error(tmp_path: Path) -> None:
+    (tmp_path / ".env").write_text("K=V")
+    with pytest.raises(ConfigError, match="instructions_file"):
+        options_from_config(parse_config({"instructions_file": ".env"}), root=tmp_path)

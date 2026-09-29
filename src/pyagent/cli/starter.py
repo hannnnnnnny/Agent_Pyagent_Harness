@@ -5,6 +5,8 @@ STARTER_CONFIG = """\
 
 # Project-specific guidance appended to the system prompt.
 instructions = ""
+# Or keep it in a file inside the workspace, e.g. "AGENTS.md".
+instructions_file = ""
 
 [model]
 name = "claude-opus-5-5"

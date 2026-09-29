@@ -43,6 +43,7 @@ class Config:
     protect: tuple[str, ...] = ()
     unprotect: tuple[str, ...] = ()
     instructions: str = ""
+    instructions_file: str = ""
     audit: bool = True
     network_enabled: bool = False
     network_allow: tuple[str, ...] = ()
@@ -53,7 +54,16 @@ class Config:
 
 
 _SCHEMA: dict[str, set[str]] = {
-    "": {"instructions", "model", "safety", "shell", "budget", "network", "limits"},
+    "": {
+        "instructions",
+        "instructions_file",
+        "model",
+        "safety",
+        "shell",
+        "budget",
+        "network",
+        "limits",
+    },
     "model": {"name", "effort", "max_tokens"},
     "safety": {"mode", "protect", "unprotect", "audit"},
     "shell": {"allow", "block"},
@@ -174,8 +184,9 @@ def parse_config(data: dict[str, Any], source: Path | None = None) -> Config:
     fields.update(_budget_fields(_section(data, "budget")))
     fields.update(_network_fields(_section(data, "network")))
     fields.update(_limits_fields(_section(data, "limits")))
-    if "instructions" in data:
-        fields["instructions"] = _expect(data["instructions"], str, "instructions")
+    for key in ("instructions", "instructions_file"):
+        if key in data:
+            fields[key] = _expect(data[key], str, key)
     return Config(**fields, source=source)
 
 

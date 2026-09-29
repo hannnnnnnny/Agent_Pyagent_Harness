@@ -110,3 +110,9 @@ def test_limits_section() -> None:
 def test_invalid_limits(limits: dict[str, Any]) -> None:
     with pytest.raises(ConfigError):
         parse_config({"limits": limits})
+
+
+def test_instructions_file_key() -> None:
+    assert parse_config({"instructions_file": "AGENTS.md"}).instructions_file == "AGENTS.md"
+    with pytest.raises(ConfigError, match="wrong type"):
+        parse_config({"instructions_file": ["AGENTS.md"]})
