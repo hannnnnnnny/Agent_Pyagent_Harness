@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import threading
 from dataclasses import dataclass
 from typing import Any
@@ -86,7 +87,15 @@ class Agent:
             result = self._result("budget", tracker, detail=str(exc))
         except ProviderError as exc:
             result = self._result("error", tracker, detail=str(exc))
-        self.events.emit("run_finished", stop=result.stop, turns=result.turns, detail=result.detail)
+        self.events.emit(
+            "run_finished",
+            stop=result.stop,
+            turns=result.turns,
+            detail=result.detail,
+            model=self.provider.model,
+            usage=dataclasses.asdict(result.usage),
+            cost_usd=result.cost_usd,
+        )
         return result
 
     def _loop(self, tracker: BudgetTracker) -> RunResult:
