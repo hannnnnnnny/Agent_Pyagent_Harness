@@ -68,6 +68,7 @@ Use `pyagent policy "<command>"` to see how a command would be treated.
 | `max_calls_per_turn` | integer | `25` | Tool calls run per model turn; extra calls get an error result |
 | `max_identical_calls` | integer | `3` | The same call this many times in a row is refused as a loop |
 | `parallel_reads` | boolean | `true` | Run a turn's read-only, approval-free calls concurrently |
+| `max_tool_output_chars` | integer | `50000` | Longest tool result sent to the model; the middle of longer output is elided |
 
 ## `[network]`
 

@@ -29,7 +29,7 @@ from pyagent.safety.workspace import Workspace
 from pyagent.tools.base import Tool, ToolContext
 from pyagent.tools.builtin import default_tools
 from pyagent.tools.builtin.web_fetch import WebFetch
-from pyagent.tools.executor import Gate
+from pyagent.tools.executor import DEFAULT_MAX_OUTPUT_CHARS, Gate
 from pyagent.tools.registry import ToolRegistry
 from pyagent.web import Fetcher
 
@@ -53,6 +53,7 @@ class AgentOptions:
     events: EventBus = field(default_factory=EventBus)
     conversation: Conversation | None = None
     dispatcher_options: dict[str, Any] = field(default_factory=dict)
+    max_tool_output_chars: int = DEFAULT_MAX_OUTPUT_CHARS
 
 
 def build_agent(root: Path | str, provider: Provider, options: AgentOptions | None = None) -> Agent:
@@ -81,6 +82,7 @@ def build_agent(root: Path | str, provider: Provider, options: AgentOptions | No
         events=opts.events,
         conversation=opts.conversation,
         dispatcher_options=opts.dispatcher_options,
+        max_tool_output_chars=opts.max_tool_output_chars,
     )
 
 
@@ -136,6 +138,7 @@ def options_from_config(
             "max_identical_calls": config.max_identical_calls,
             "parallel_reads": config.parallel_reads,
         },
+        max_tool_output_chars=config.max_tool_output_chars,
     )
 
 
