@@ -14,3 +14,6 @@ dependencies = ["anthropic>=1.9"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pyagent"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11"]
