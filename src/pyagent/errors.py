@@ -9,3 +9,7 @@ from __future__ import annotations
 
 class PyAgentError(Exception):
     """Base class for all pyagent errors."""
+
+
+class ConfigError(PyAgentError):
+    """Raised when configuration is missing or invalid."""
