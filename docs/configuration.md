@@ -13,6 +13,10 @@ Command-line flags override the file: `--mode`, `--model`, `--effort`,
 | Key | Type | Default | Meaning |
 |---|---|---|---|
 | `instructions` | string | `""` | Extra guidance appended to the system prompt |
+| `instructions_file` | string | `""` | Workspace file (e.g. `AGENTS.md`) whose contents are appended after `instructions` |
+
+`instructions_file` is read through the workspace sandbox: it must be inside the
+workspace, cannot be a protected file, and is capped at 32 KiB.
 
 ## `[model]`
 
