@@ -11,7 +11,12 @@ import sys
 
 import pyagent
 
-MODULES = sorted(m.name for m in pkgutil.walk_packages(pyagent.__path__, prefix="pyagent."))
+# __main__ modules run the CLI on import, so they are exercised by the CLI tests instead.
+MODULES = sorted(
+    m.name
+    for m in pkgutil.walk_packages(pyagent.__path__, prefix="pyagent.")
+    if not m.name.endswith(".__main__")
+)
 
 SCRIPT = """
 import importlib, sys, traceback
