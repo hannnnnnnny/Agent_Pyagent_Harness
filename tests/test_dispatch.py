@@ -44,6 +44,29 @@ def test_events_wrap_each_call(tmp_path: Path) -> None:
     assert [e.kind for e in events] == ["tool_started", "tool_finished"]
 
 
-def test_limit_must_be_positive(tmp_path: Path) -> None:
+@pytest.mark.parametrize("limit", ["max_calls_per_turn", "max_identical_calls"])
+def test_limits_must_be_positive(tmp_path: Path, limit: str) -> None:
     with pytest.raises(ValueError):
-        make(tmp_path, max_calls_per_turn=0)
+        make(tmp_path, **{limit: 0})
+
+
+def test_identical_calls_in_a_row_are_cut_off(tmp_path: Path) -> None:
+    dispatcher, _ = make(tmp_path, max_identical_calls=2)
+    outcomes = [dispatcher.run(calls(1))[0].is_error for _ in range(4)]
+    assert outcomes == [False, False, True, True]
+
+
+def test_a_different_call_resets_the_repeat_count(tmp_path: Path) -> None:
+    dispatcher, _ = make(tmp_path, max_identical_calls=2)
+    dispatcher.run(calls(1))
+    dispatcher.run(calls(1))
+    dispatcher.run([ToolCall("x", "glob", {"pattern": "*"})])
+    assert not dispatcher.run(calls(1))[0].is_error
+
+
+def test_same_tool_with_different_input_is_not_a_repeat(tmp_path: Path) -> None:
+    dispatcher, _ = make(tmp_path, max_identical_calls=1)
+    first = dispatcher.run([ToolCall("a", "glob", {"pattern": "*.py"})])
+    second = dispatcher.run([ToolCall("b", "glob", {"pattern": "*.md"})])
+    assert not first[0].is_error
+    assert not second[0].is_error
