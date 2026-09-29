@@ -37,6 +37,10 @@ class WebFetch(Tool):
             self.fetcher.check_url(args["url"])
         except SafetyError as exc:
             return Assessment.block(str(exc))
+        if not self.fetcher.allowed_domains:
+            # Any URL can carry data out (e.g. in its query string), so arbitrary
+            # destinations always need a human; unattended runs therefore refuse.
+            return Assessment.ask("no [network] allow_domains are configured")
         return Assessment.allow()
 
     def run(self, args: dict[str, Any], ctx: ToolContext) -> str:
