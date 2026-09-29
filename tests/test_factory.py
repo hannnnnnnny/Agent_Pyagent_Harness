@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from pyagent.config import parse_config
-from pyagent.errors import ConfigError
+from pyagent.errors import ConfigError, PolicyViolation
 from pyagent.factory import (
     STATE_DIR,
     AgentOptions,
@@ -11,11 +11,12 @@ from pyagent.factory import (
     options_from_config,
     protected_paths_from,
 )
-from pyagent.messages import Conversation
+from pyagent.messages import Conversation, ToolCall
 from pyagent.providers.scripted import ScriptedProvider, text_turn, tool_turn
 from pyagent.safety.approval import Choice, ScriptedApprover
 from pyagent.safety.audit import read_audit
 from pyagent.safety.modes import ApprovalMode
+from pyagent.tools.base import Tool
 
 
 def test_default_agent_cannot_write_without_approval(tmp_path: Path) -> None:
@@ -158,3 +159,26 @@ def test_protected_instructions_file_is_a_config_error(tmp_path: Path) -> None:
     (tmp_path / ".env").write_text("K=V")
     with pytest.raises(ConfigError, match="instructions_file"):
         options_from_config(parse_config({"instructions_file": ".env"}), root=tmp_path)
+
+
+def test_extra_gates_run_after_the_safety_gate(tmp_path: Path) -> None:
+    seen: list[str] = []
+
+    def no_migrations(tool: Tool, call: ToolCall) -> None:
+        seen.append(call.name)
+        if str(call.input.get("path", "")).startswith("migrations/"):
+            raise PolicyViolation("migrations are generated; edit the models instead")
+
+    provider = ScriptedProvider(
+        [
+            tool_turn(("write_file", {"path": "migrations/0001.py", "content": "x"})),
+            tool_turn(("run_shell", {"command": "sudo id"})),
+            text_turn("ok"),
+        ]
+    )
+    options = AgentOptions(mode=ApprovalMode.AUTO_EDIT, extra_gates=[no_migrations], audit=False)
+    build_agent(tmp_path, provider, options).run("add a migration")
+    assert "edit the models instead" in str(provider.requests[1].messages[-1])
+    assert not (tmp_path / "migrations").exists()
+    # The built-in gate blocked sudo first, so the custom gate never saw it.
+    assert seen == ["write_file"]

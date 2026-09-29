@@ -29,6 +29,7 @@ from pyagent.safety.workspace import Workspace
 from pyagent.tools.base import Tool, ToolContext
 from pyagent.tools.builtin import default_tools
 from pyagent.tools.builtin.web_fetch import WebFetch
+from pyagent.tools.executor import Gate
 from pyagent.tools.registry import ToolRegistry
 from pyagent.web import Fetcher
 
@@ -45,6 +46,8 @@ class AgentOptions:
     command_policy: CommandPolicy = field(default_factory=CommandPolicy)
     protected: ProtectedPaths = field(default_factory=ProtectedPaths)
     extra_tools: list[Tool] = field(default_factory=list)
+    # Project-specific checks, run after the built-in SafetyGate has allowed a call.
+    extra_gates: list[Gate] = field(default_factory=list)
     instructions: str = ""
     audit: bool = True
     events: EventBus = field(default_factory=EventBus)
@@ -71,7 +74,7 @@ def build_agent(root: Path | str, provider: Provider, options: AgentOptions | No
         provider,
         tools,
         ctx,
-        gates=[gate],
+        gates=[gate, *opts.extra_gates],
         output_filters=[redactor.redact, injection_filter],
         system_prompt=build_system_prompt(opts.instructions),
         budget=opts.budget,
