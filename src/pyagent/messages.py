@@ -95,3 +95,7 @@ class Conversation:
         if not results:
             raise ValueError("at least one tool result is required")
         self._messages.append({"role": "user", "content": [r.to_block() for r in results]})
+
+    @property
+    def last_role(self) -> str | None:
+        return self._messages[-1]["role"] if self._messages else None
