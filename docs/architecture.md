@@ -36,27 +36,30 @@ import cycles cannot creep back in.
    - `max_tokens` with tool calls: the calls may be truncated, so they are
      **not run**; each gets an error result asking the model to re-issue it.
    - no tool calls: the run ends (`completed` or `max_tokens`).
-6. Each tool call goes through the `ToolExecutor` (below). All results for a
-   turn are returned in a single user message.
+6. The `Dispatcher` runs the turn's tool calls: at most `max_calls_per_turn`
+   are executed, an identical call repeated too many times in a row is refused,
+   and when every call is read-only and needs no approval they run concurrently.
+   Each call goes through the `ToolExecutor` (below), and all results for a
+   turn are returned in a single user message, in the original order.
 7. Five consecutive turns in which every call failed end the run as `stuck`.
 
 ## The tool execution pipeline
 
 ```text
 ToolCall
-  │
-  ├─ unknown tool? ───────────────────────────────▶ error result
-  ├─ validate input against the tool's JSON schema ▶ error result on failure
-  ├─ gates (SafetyGate)
-  │    strictest(mode × risk, tool.assess(args))
-  │      BLOCK ─────────────────────────────────▶ error result (never approvable)
-  │      ASK   ─▶ approver ─ deny ─────────────▶ error result (+ user's note)
-  │      ALLOW
-  ├─ tool.run(args, ctx)
-  │    ToolError ────────────────────────────────▶ error result (message shown)
-  │    unexpected exception ─────────────────────▶ generic error (details logged locally)
-  ├─ output filters: secret redaction, injection flagging
-  └─ middle truncation ────────────────────────────▶ ToolResult
+  â”‚
+  â”œâ”€ unknown tool? â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ error result
+  â”œâ”€ validate input against the tool's JSON schema â–¶ error result on failure
+  â”œâ”€ gates (SafetyGate)
+  â”‚    strictest(mode Ã— risk, tool.assess(args))
+  â”‚      BLOCK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ error result (never approvable)
+  â”‚      ASK   â”€â–¶ approver â”€ deny â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ error result (+ user's note)
+  â”‚      ALLOW
+  â”œâ”€ tool.run(args, ctx)
+  â”‚    ToolError â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ error result (message shown)
+  â”‚    unexpected exception â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ generic error (details logged locally)
+  â”œâ”€ output filters: secret redaction, injection flagging
+  â””â”€ middle truncation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ ToolResult
 ```
 
 Nothing a tool does can crash the loop: every failure becomes an `is_error`
