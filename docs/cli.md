@@ -55,6 +55,13 @@ estimated cost, tool calls, and the task. `-n N` controls how many runs.
 
 Print the last `-n N` raw audit records (timestamp, event kind, data).
 
+## `pyagent doctor`
+
+Check the environment: Python version, whether credentials are configured
+(presence only, never the value), which shell `run_shell` will use, whether
+`pyagent.toml` is valid, and whether the workspace is writable. Exits `1` if
+any check fails, so it can gate CI jobs.
+
 ## `pyagent init`
 
 Write a commented starter `pyagent.toml`. Refuses to overwrite an existing file.
