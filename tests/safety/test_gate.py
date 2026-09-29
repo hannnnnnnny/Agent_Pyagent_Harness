@@ -4,7 +4,7 @@ import pytest
 
 from pyagent.events import Event, EventBus
 from pyagent.messages import ToolCall
-from pyagent.safety.approval import Choice, ScriptedApprover
+from pyagent.safety.approval import ApprovalDecision, Choice, ScriptedApprover
 from pyagent.safety.gate import SafetyGate
 from pyagent.safety.modes import ApprovalMode
 from pyagent.tools.base import ToolContext
@@ -107,3 +107,25 @@ def test_events_are_emitted(root: Path) -> None:
         "approval_decided",
         "action_blocked",
     ]
+
+
+def test_automatic_denial_is_not_attributed_to_the_user(root: Path) -> None:
+    ctx = ToolContext.for_root(root)
+    gate = SafetyGate(ctx, ApprovalMode.ASK)
+    executor = ToolExecutor(ToolRegistry(default_tools()), ctx, gates=[gate])
+    result = executor.execute(ToolCall("id", "write_file", {"path": "b.txt", "content": "x"}))
+    assert "none was available" in result.content
+    assert "user" not in result.content
+
+
+def test_user_denial_note_is_relayed(root: Path) -> None:
+    ctx = ToolContext.for_root(root)
+
+    def say_no(request: object) -> ApprovalDecision:
+        return ApprovalDecision(Choice.DENY, "use a branch")
+
+    gate = SafetyGate(ctx, ApprovalMode.ASK, say_no)
+    executor = ToolExecutor(ToolRegistry(default_tools()), ctx, gates=[gate])
+    result = executor.execute(ToolCall("id", "write_file", {"path": "b.txt", "content": "x"}))
+    assert result.is_error
+    assert "the user declined this action (user said: use a branch)" in result.content

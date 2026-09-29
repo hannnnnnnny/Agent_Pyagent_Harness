@@ -59,7 +59,7 @@ def test_non_interactive_run_denies_writes(tmp_path: Path) -> None:
     term = Term()
     main(["run", "write", "-w", str(tmp_path)], io=term.io, provider_factory=make)
     assert not (tmp_path / "a.txt").exists()
-    assert "declined" in term.out
+    assert "needs approval, but none was available" in term.out
 
 
 def test_interactive_run_asks_and_writes(tmp_path: Path) -> None:

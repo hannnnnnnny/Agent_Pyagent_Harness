@@ -33,6 +33,9 @@ class ApprovalRequest:
 class ApprovalDecision:
     choice: Choice
     note: str = ""
+    # False when no human was consulted (e.g. deny_all), so messages don't
+    # misattribute an automatic denial to the user.
+    by_user: bool = True
 
     @property
     def approved(self) -> bool:
@@ -45,7 +48,7 @@ class Approver(Protocol):
 
 def deny_all(request: ApprovalRequest) -> ApprovalDecision:
     """Default for non-interactive use: nothing risky runs without a human."""
-    return ApprovalDecision(Choice.DENY, "no approver is configured")
+    return ApprovalDecision(Choice.DENY, "no approver is configured", by_user=False)
 
 
 @dataclass
