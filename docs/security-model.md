@@ -45,7 +45,7 @@ Every segment gets a verdict and the strictest one wins:
 
 - **Block** (cannot be approved): privilege escalation (`sudo`, `su`, ...),
   system administration, `mkfs`/raw `dd`, recursive deletion or chmod of `/`,
-  `~`, or the workspace; download-and-execute pipelines (`curl … | sh`);
+  `~`, or the workspace; download-and-execute pipelines (`curl â€¦ | sh`);
   redirects that leave the workspace or hit protected files; arguments that
   name protected files (`cat .env`, `head ~/.ssh/id_rsa`); unparseable input.
 - **Ask**: network tools, git operations that touch remotes or discard work,
@@ -60,6 +60,21 @@ timeout that kills the whole process tree, capped output, and an
 **allowlisted environment**: only variables such as `PATH`, `HOME`, and locale
 settings are passed, and anything with a secret-looking name is dropped even if
 allowlisted.
+
+## Layer 3b: network access
+
+`web_fetch` is disabled unless `[network] enabled = true`. When enabled:
+
+- only `http` and `https` URLs without embedded credentials are accepted, and an
+  optional domain allowlist is enforced before any request is made;
+- the host is resolved and **every** returned address must be public, which
+  rules out loopback, private ranges, link-local (including `169.254.169.254`
+  cloud metadata), and IPv4-mapped IPv6 tricks;
+- the connection is pinned to the address that passed the check, so a DNS
+  answer that changes afterwards (DNS rebinding) cannot redirect it, while TLS
+  still verifies the certificate against the hostname;
+- each redirect hop is re-validated, redirects are capped, only text content
+  types are read, and bodies are size-limited.
 
 ## Layer 4: approval modes and the safety gate
 

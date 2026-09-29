@@ -57,6 +57,17 @@ Use `pyagent policy "<command>"` to see how a command would be treated.
 | `max_total_tokens` | integer | unlimited | Tokens per run (input, output, and cache) |
 | `max_cost_usd` | number | unlimited | Estimated USD per run (known models only) |
 
+## `[network]`
+
+| Key | Type | Default | Meaning |
+|---|---|---|---|
+| `enabled` | boolean | `false` | Register the `web_fetch` tool |
+| `allow_domains` | list of strings | `[]` | If set, only these domains and their subdomains can be fetched |
+
+Even when enabled, requests to private, loopback, link-local, and cloud
+metadata addresses are refused, every redirect is re-checked, and `web_fetch`
+is a network-risk tool, so it asks for approval in `ask` and `auto-edit` modes.
+
 ## Example
 
 ```toml
@@ -77,4 +88,8 @@ block = ["docker"]
 [budget]
 max_turns = 40
 max_cost_usd = 5.0
+
+[network]
+enabled = true
+allow_domains = ["docs.python.org", "pypi.org"]
 ```
