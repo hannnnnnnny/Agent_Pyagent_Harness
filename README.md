@@ -67,3 +67,28 @@ or reading `.env`) can never be approved in any mode.
 | `write_file` | write | Create or replace a file (atomic, size-limited) |
 | `edit_file` | write | Exact, unique string replacement |
 | `run_shell` | execute | Policy-checked shell command with a scrubbed environment |
+
+## Using pyagent from Python
+
+```python
+from pyagent import AgentOptions, ApprovalMode, Budget, build_agent
+from pyagent.providers.anthropic import AnthropicProvider
+from pyagent.safety import ConsoleApprover
+import sys
+
+agent = build_agent(
+    "path/to/project",
+    AnthropicProvider(effort="high"),
+    AgentOptions(
+        mode=ApprovalMode.AUTO_EDIT,
+        approver=ConsoleApprover(sys.stdin, sys.stdout),
+        budget=Budget(max_turns=30, max_cost_usd=2.0),
+    ),
+)
+result = agent.run("Fix the failing test in tests/test_parser.py")
+print(result.stop, result.text)
+```
+
+`result.stop` is one of `completed`, `refused`, `max_tokens`, `budget`,
+`stuck`, `cancelled`, or `error`. See [`examples/`](examples/) for custom tools
+and an offline demo.
