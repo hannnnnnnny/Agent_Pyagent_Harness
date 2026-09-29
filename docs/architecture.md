@@ -36,8 +36,11 @@ import cycles cannot creep back in.
    - `max_tokens` with tool calls: the calls may be truncated, so they are
      **not run**; each gets an error result asking the model to re-issue it.
    - no tool calls: the run ends (`completed` or `max_tokens`).
-6. Each tool call goes through the `ToolExecutor` (below). All results for a
-   turn are returned in a single user message.
+6. The `Dispatcher` runs the turn's tool calls: at most `max_calls_per_turn`
+   are executed, an identical call repeated too many times in a row is refused,
+   and when every call is read-only and needs no approval they run concurrently.
+   Each call goes through the `ToolExecutor` (below), and all results for a
+   turn are returned in a single user message, in the original order.
 7. Five consecutive turns in which every call failed end the run as `stuck`.
 
 ## The tool execution pipeline

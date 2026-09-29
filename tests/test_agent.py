@@ -173,3 +173,13 @@ def test_provider_errors_other_than_exhaustion_are_reported(tmp_path: Path) -> N
 @pytest.mark.parametrize("stop", ["completed", "refused", "budget", "stuck", "cancelled"])
 def test_only_completed_is_ok(stop: str) -> None:
     assert RunResult("", stop, 0, Usage()).ok is (stop == "completed")
+
+
+def test_dispatcher_options_are_applied(tmp_path: Path) -> None:
+    turn = tool_turn(("list_dir", {}), ("list_dir", {"path": "."}), ("glob", {"pattern": "*"}))
+    agent = make_agent(
+        tmp_path, [turn, text_turn("ok")], dispatcher_options={"max_calls_per_turn": 1}
+    )
+    agent.run("look")
+    results = agent.conversation.messages[2]["content"]
+    assert [r.get("is_error", False) for r in results] == [False, True, True]

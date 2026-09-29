@@ -57,6 +57,14 @@ Use `pyagent policy "<command>"` to see how a command would be treated.
 | `max_total_tokens` | integer | unlimited | Tokens per run (input, output, and cache) |
 | `max_cost_usd` | number | unlimited | Estimated USD per run (known models only) |
 
+## `[limits]`
+
+| Key | Type | Default | Meaning |
+|---|---|---|---|
+| `max_calls_per_turn` | integer | `25` | Tool calls run per model turn; extra calls get an error result |
+| `max_identical_calls` | integer | `3` | The same call this many times in a row is refused as a loop |
+| `parallel_reads` | boolean | `true` | Run a turn's read-only, approval-free calls concurrently |
+
 ## `[network]`
 
 | Key | Type | Default | Meaning |

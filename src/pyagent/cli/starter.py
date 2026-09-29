@@ -29,6 +29,11 @@ block = []
 max_turns = 50
 # max_cost_usd = 5.0
 
+[limits]
+max_calls_per_turn = 25
+max_identical_calls = 3
+parallel_reads = true
+
 [network]
 # Enables the web_fetch tool. Private, local, and metadata addresses are never reachable.
 enabled = false

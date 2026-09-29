@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import threading
 from dataclasses import dataclass
+from typing import Any
 
 from pyagent.budget import Budget, BudgetTracker
+from pyagent.dispatch import Dispatcher
 from pyagent.errors import BudgetExceeded, ProviderError
 from pyagent.events import EventBus
 from pyagent.messages import Conversation, ModelResponse, ToolResult
@@ -53,6 +55,7 @@ class Agent:
         budget: Budget | None = None,
         events: EventBus | None = None,
         conversation: Conversation | None = None,
+        dispatcher_options: dict[str, Any] | None = None,
     ) -> None:
         self.provider = provider
         self.tools = tools
@@ -61,6 +64,7 @@ class Agent:
         self.events = events or EventBus()
         self.conversation = conversation or Conversation()
         self.executor = ToolExecutor(tools, ctx, gates=gates, output_filters=output_filters)
+        self.dispatcher = Dispatcher(self.executor, self.events, **(dispatcher_options or {}))
         self._cancelled = threading.Event()
 
     def cancel(self) -> None:
@@ -103,7 +107,7 @@ class Agent:
             if response.stop_reason == "max_tokens":
                 results = [ToolResult(c.id, TRUNCATED_CALL_MESSAGE, is_error=True) for c in calls]
             else:
-                results = self._run_tools(response)
+                results = self.dispatcher.run(calls)
             self.conversation.add_tool_results(results)
             failed_turns = failed_turns + 1 if all(r.is_error for r in results) else 0
             if failed_turns >= MAX_CONSECUTIVE_FAILED_TURNS:
@@ -128,17 +132,6 @@ class Agent:
             output_tokens=response.usage.output_tokens,
         )
         return response
-
-    def _run_tools(self, response: ModelResponse) -> list[ToolResult]:
-        results = []
-        for call in response.tool_calls:
-            self.events.emit("tool_started", tool=call.name, input=call.input)
-            result = self.executor.execute(call)
-            self.events.emit(
-                "tool_finished", tool=call.name, is_error=result.is_error, output=result.content
-            )
-            results.append(result)
-        return results
 
     def _result(
         self, stop: str, tracker: BudgetTracker, *, text: str = "", detail: str = ""
