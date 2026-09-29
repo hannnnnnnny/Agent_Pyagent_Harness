@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from pyagent.diffs import unified_diff
 from pyagent.errors import ToolError
 from pyagent.safety.fileio import read_text, write_text
 from pyagent.tools.base import Risk, Tool, ToolContext
@@ -46,6 +47,8 @@ class EditFile(Tool):
                 f"old_string matches {count} times; add surrounding context "
                 "to make it unique or set replace_all"
             )
-        write_text(path, text.replace(old, new))
+        updated = text.replace(old, new)
+        write_text(path, updated)
         noun = "occurrence" if count == 1 else "occurrences"
-        return f"Replaced {count} {noun} in {ctx.workspace.relative(path)}"
+        rel = ctx.workspace.relative(path)
+        return f"Replaced {count} {noun} in {rel}\n{unified_diff(text, updated, rel)}"
