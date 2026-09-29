@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/hannnnnnnny/Agent_Pyagent_Harness/security/advisories/new
+    about: Sandbox escapes, policy bypasses, and secret leaks must be reported privately.
