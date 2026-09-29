@@ -2,23 +2,16 @@
 
 from __future__ import annotations
 
-import enum
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, ClassVar
 
+from pyagent.safety.risk import Risk
+
+__all__ = ["Risk", "Tool", "ToolContext"]
 from pyagent.safety.verdict import Assessment
 from pyagent.safety.workspace import Workspace
-
-
-class Risk(enum.Enum):
-    """How much damage a tool can do; drives approval decisions."""
-
-    READ = "read"
-    WRITE = "write"
-    EXECUTE = "execute"
-    NETWORK = "network"
 
 
 @dataclass
