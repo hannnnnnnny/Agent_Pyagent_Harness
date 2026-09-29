@@ -32,7 +32,7 @@ def looks_like_injection(text: str) -> bool:
     return _DETECTOR.search(text) is not None
 
 
-def make_injection_filter(on_detect: Callable[[str], None] | None = None) -> Callable[[str], str]:
+def make_injection_filter(on_detect: Callable[[str], object] | None = None) -> Callable[[str], str]:
     """Build an executor output filter that annotates suspicious output."""
 
     def injection_filter(text: str) -> str:
