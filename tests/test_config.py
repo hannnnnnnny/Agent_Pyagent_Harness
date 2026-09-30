@@ -11,6 +11,7 @@ FULL = """
 instructions = "Run pytest before finishing."
 
 [model]
+provider = "anthropic"
 name = "claude-sonnet-5-5"
 effort = "medium"
 max_tokens = 32000
@@ -43,6 +44,7 @@ def test_missing_file_gives_defaults(tmp_path: Path) -> None:
 def test_full_config(tmp_path: Path) -> None:
     (tmp_path / CONFIG_FILENAME).write_text(FULL)
     config = load_config(tmp_path)
+    assert config.provider == "anthropic"
     assert config.model == "claude-sonnet-5-5"
     assert config.effort == "medium"
     assert config.max_tokens == 32000
@@ -116,3 +118,20 @@ def test_instructions_file_key() -> None:
     assert parse_config({"instructions_file": "AGENTS.md"}).instructions_file == "AGENTS.md"
     with pytest.raises(ConfigError, match="wrong type"):
         parse_config({"instructions_file": ["AGENTS.md"]})
+
+
+def test_default_provider_is_deepseek() -> None:
+    config = Config()
+    assert config.provider == "deepseek"
+    assert config.resolved_model == "deepseek-v4-pro"
+
+
+def test_explicit_model_wins_over_provider_default() -> None:
+    config = parse_config({"model": {"provider": "anthropic"}})
+    assert config.resolved_model == "claude-opus-5-5"
+    assert parse_config({"model": {"name": "deepseek-flash"}}).resolved_model == "deepseek-flash"
+
+
+def test_unknown_provider_rejected() -> None:
+    with pytest.raises(ConfigError, match=r"model\.provider must be one of"):
+        parse_config({"model": {"provider": "openai"}})

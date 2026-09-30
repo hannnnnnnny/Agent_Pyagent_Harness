@@ -19,6 +19,7 @@ from pyagent.providers.anthropic import (
     DEFAULT_MODEL,
     EFFORT_LEVELS,
 )
+from pyagent.providers.deepseek import DEFAULT_DEEPSEEK_MODEL
 from pyagent.safety.modes import ApprovalMode
 from pyagent.tools.executor import DEFAULT_MAX_OUTPUT_CHARS
 
@@ -28,11 +29,14 @@ else:  # pragma: no cover - exercised on 3.10 CI only
     import tomli as tomllib
 
 CONFIG_FILENAME = "pyagent.toml"
+PROVIDER_DEFAULT_MODELS = {"deepseek": DEFAULT_DEEPSEEK_MODEL, "anthropic": DEFAULT_MODEL}
 
 
 @dataclass(frozen=True)
 class Config:
-    model: str = DEFAULT_MODEL
+    provider: str = "deepseek"
+    # Empty means the provider's default model (see ``resolved_model``).
+    model: str = ""
     effort: str = DEFAULT_EFFORT
     max_tokens: int = DEFAULT_MAX_TOKENS
     mode: ApprovalMode = ApprovalMode.ASK
@@ -54,6 +58,10 @@ class Config:
     max_tool_output_chars: int = DEFAULT_MAX_OUTPUT_CHARS
     source: Path | None = field(default=None, compare=False)
 
+    @property
+    def resolved_model(self) -> str:
+        return self.model or PROVIDER_DEFAULT_MODELS[self.provider]
+
 
 _SCHEMA: dict[str, set[str]] = {
     "": {
@@ -66,7 +74,7 @@ _SCHEMA: dict[str, set[str]] = {
         "network",
         "limits",
     },
-    "model": {"name", "effort", "max_tokens"},
+    "model": {"provider", "name", "effort", "max_tokens"},
     "safety": {"mode", "protect", "unprotect", "audit"},
     "shell": {"allow", "block"},
     "budget": {"max_turns", "max_cost_usd", "max_total_tokens"},
@@ -116,6 +124,11 @@ def _section(data: dict[str, Any], name: str) -> dict[str, Any]:
 
 def _model_fields(section: dict[str, Any]) -> dict[str, Any]:
     fields: dict[str, Any] = {}
+    if "provider" in section:
+        provider = _expect(section["provider"], str, "model.provider")
+        if provider not in PROVIDER_DEFAULT_MODELS:
+            raise ConfigError(f"model.provider must be one of {', '.join(PROVIDER_DEFAULT_MODELS)}")
+        fields["provider"] = provider
     if "name" in section:
         fields["model"] = _expect(section["name"], str, "model.name")
     if "effort" in section:
