@@ -14,12 +14,13 @@ from pyagent import __version__
 from pyagent.agent import Agent, RunResult
 from pyagent.cli.render import ConsoleRenderer, format_result, result_to_dict
 from pyagent.cli.starter import STARTER_CONFIG
-from pyagent.config import CONFIG_FILENAME, Config, load_config
+from pyagent.config import CONFIG_FILENAME, PROVIDER_DEFAULT_MODELS, Config, load_config
 from pyagent.doctor import FAIL, run_checks
 from pyagent.errors import ConfigError, PyAgentError
 from pyagent.factory import STATE_DIR, build_agent, options_from_config
-from pyagent.providers.anthropic import EFFORT_LEVELS
+from pyagent.providers.anthropic import EFFORT_LEVELS, AnthropicProvider
 from pyagent.providers.base import Provider
+from pyagent.providers.deepseek import DeepSeekProvider
 from pyagent.report import RunSummary, summarize_runs
 from pyagent.safety.approval import ConsoleApprover, deny_all
 from pyagent.safety.audit import read_audit
@@ -47,6 +48,7 @@ class IO:
 def _add_run_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("-w", "--workspace", type=Path, default=Path.cwd(), help="workspace root")
     parser.add_argument("--mode", choices=[m.value for m in ApprovalMode], help="approval mode")
+    parser.add_argument("--provider", choices=list(PROVIDER_DEFAULT_MODELS), help="model provider")
     parser.add_argument("--model", help="model id (default from config)")
     parser.add_argument("--effort", choices=EFFORT_LEVELS, help="reasoning effort")
     parser.add_argument("--max-turns", type=int, help="stop after this many model turns")
@@ -89,7 +91,12 @@ def build_parser() -> argparse.ArgumentParser:
 def apply_overrides(config: Config, args: argparse.Namespace) -> Config:
     """Command-line flags win over the config file."""
     changes: dict[str, Any] = {}
-    for flag, field in (("model", "model"), ("effort", "effort"), ("max_turns", "max_turns")):
+    for flag, field in (
+        ("provider", "provider"),
+        ("model", "model"),
+        ("effort", "effort"),
+        ("max_turns", "max_turns"),
+    ):
         if getattr(args, flag, None) is not None:
             changes[field] = getattr(args, flag)
     if getattr(args, "mode", None):
@@ -106,9 +113,9 @@ def apply_overrides(config: Config, args: argparse.Namespace) -> Config:
 
 
 def default_provider(config: Config) -> Provider:
-    from pyagent.providers.anthropic import AnthropicProvider  # noqa: PLC0415 - defer SDK import
-
-    return AnthropicProvider(config.model, max_tokens=config.max_tokens, effort=config.effort)
+    """Build the provider named in the config."""
+    cls = DeepSeekProvider if config.provider == "deepseek" else AnthropicProvider
+    return cls(config.resolved_model, max_tokens=config.max_tokens, effort=config.effort)
 
 
 @dataclasses.dataclass
@@ -155,7 +162,7 @@ def _make_session(
         options.events.subscribe(ConsoleRenderer(io.stdout, verbose=args.verbose))
     agent = build_agent(args.workspace, provider_factory(config), options)
     session_id = args.resume or new_session_id()
-    return CliSession(agent, store, session_id, config.model, json_output=json_output)
+    return CliSession(agent, store, session_id, config.resolved_model, json_output=json_output)
 
 
 def cmd_run(args: argparse.Namespace, config: Config, io: IO, factory: ProviderFactory) -> int:

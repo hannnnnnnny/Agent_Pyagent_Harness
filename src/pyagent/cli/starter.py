@@ -9,7 +9,10 @@ instructions = ""
 instructions_file = ""
 
 [model]
-name = "claude-opus-5-5"
+# deepseek (key in DEEPSEEK_API_KEY) or anthropic (ANTHROPIC_API_KEY / `ant auth login`)
+provider = "deepseek"
+# Defaults to deepseek-v4-pro or claude-opus-5-5; also try "deepseek-flash".
+# name = "deepseek-v4-pro"
 effort = "high"          # low | medium | high | xhigh | max
 
 [safety]

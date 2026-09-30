@@ -5,12 +5,12 @@ build-backend = "hatchling.build"
 [project]
 name = "pyagent"
 version = "0.1.0"
-description = "A powerful, safety-first agent harness for Claude."
+description = "A powerful, safety-first agent harness for DeepSeek and Claude models."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 authors = [{ name = "Yi Han" }]
-keywords = ["agent", "claude", "anthropic", "llm", "sandbox", "tool-use"]
+keywords = ["agent", "deepseek", "claude", "anthropic", "llm", "sandbox", "tool-use"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",

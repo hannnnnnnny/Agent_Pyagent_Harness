@@ -72,3 +72,9 @@ def test_secrets_from_env_only_takes_secret_names() -> None:
 def test_from_environment() -> None:
     r = Redactor.from_environment({"SERVICE_TOKEN": "unusual-format-value"})
     assert r.redact("got unusual-format-value") == f"got {PLACEHOLDER}"
+
+
+def test_deepseek_key_from_environment_is_redacted() -> None:
+    key = "sk-" + "0123456789abcdef" * 2
+    r = Redactor.from_environment({"DEEPSEEK_API_KEY": key})
+    assert r.redact(f"key={key}") == "key=[REDACTED]"

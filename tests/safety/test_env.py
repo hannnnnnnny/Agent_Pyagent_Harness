@@ -36,3 +36,8 @@ def test_source_is_not_mutated() -> None:
     source = dict(SOURCE)
     scrub_env(source)
     assert source == SOURCE
+
+
+def test_provider_keys_never_reach_subprocesses() -> None:
+    source = {"PATH": "/bin", "DEEPSEEK_API_KEY": "sk-ds", "ANTHROPIC_API_KEY": "sk-ant"}
+    assert scrub_env(source) == {"PATH": "/bin"}

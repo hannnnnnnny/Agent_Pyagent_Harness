@@ -13,8 +13,9 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
-from pyagent.config import load_config
+from pyagent.config import Config, load_config
 from pyagent.errors import ConfigError
+from pyagent.providers.deepseek import API_KEY_ENV as DEEPSEEK_KEY_ENV
 
 OK, WARN, FAIL = "ok", "warn", "fail"
 
@@ -32,7 +33,15 @@ def check_python() -> Check:
     return Check("python", status, version)
 
 
-def check_credentials(environ: Mapping[str, str], home: Path) -> Check:
+def check_credentials(environ: Mapping[str, str], home: Path, provider: str = "anthropic") -> Check:
+    if provider == "deepseek":
+        if environ.get(DEEPSEEK_KEY_ENV):
+            return Check("credentials", OK, f"{DEEPSEEK_KEY_ENV} is set")
+        return Check(
+            "credentials",
+            WARN,
+            f"{DEEPSEEK_KEY_ENV} is not set; get a key at platform.deepseek.com",
+        )
     for name in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"):
         if environ.get(name):
             return Check("credentials", OK, f"{name} is set")
@@ -63,7 +72,12 @@ def check_config(root: Path) -> Check:
     except ConfigError as exc:
         return Check("config", FAIL, str(exc))
     source = config.source.name if config.source else "defaults (no pyagent.toml)"
-    return Check("config", OK, f"{source}; mode={config.mode.value}")
+    return Check(
+        "config",
+        OK,
+        f"{source}; provider={config.provider}, model={config.resolved_model}, "
+        f"mode={config.mode.value}",
+    )
 
 
 def check_state_dir(root: Path) -> Check:
@@ -74,9 +88,13 @@ def check_state_dir(root: Path) -> Check:
 
 def run_checks(root: Path, environ: Mapping[str, str] | None = None) -> list[Check]:
     env = os.environ if environ is None else environ
+    try:
+        provider = load_config(root).provider
+    except ConfigError:
+        provider = Config().provider  # the config check reports the error itself
     return [
         check_python(),
-        check_credentials(env, Path.home()),
+        check_credentials(env, Path.home(), provider),
         check_shell(),
         check_config(root),
         check_state_dir(root),
