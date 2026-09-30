@@ -50,3 +50,18 @@ def test_config_check(tmp_path: Path) -> None:
 def test_run_checks_covers_everything(tmp_path: Path) -> None:
     names = [c.name for c in run_checks(tmp_path, {})]
     assert names == ["python", "credentials", "shell", "config", "workspace"]
+
+
+def test_deepseek_credentials(tmp_path: Path) -> None:
+    ok = check_credentials({"DEEPSEEK_API_KEY": "sk-deepseek-secret"}, tmp_path, "deepseek")
+    assert ok.status == OK
+    assert "secret" not in ok.detail
+    missing = check_credentials({"ANTHROPIC_API_KEY": "x"}, tmp_path, "deepseek")
+    assert missing.status == WARN
+    assert "DEEPSEEK_API_KEY" in missing.detail
+
+
+def test_run_checks_follows_the_configured_provider(tmp_path: Path) -> None:
+    checks = {c.name: c for c in run_checks(tmp_path, {"DEEPSEEK_API_KEY": "k"})}
+    assert checks["credentials"].status == OK
+    assert "provider=deepseek" in checks["config"].detail
