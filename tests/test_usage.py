@@ -25,3 +25,9 @@ def test_cost_for_unknown_model_is_none() -> None:
 def test_cache_reads_are_cheaper_than_input() -> None:
     for pricing in PRICING.values():
         assert pricing.cache_read < pricing.input
+
+
+def test_deepseek_costs_use_peak_rates() -> None:
+    usage = Usage(input_tokens=1_000_000, output_tokens=1_000_000)
+    assert estimate_cost("deepseek-v4-pro", usage) == pytest.approx(5.28)
+    assert estimate_cost("deepseek-flash", usage) == pytest.approx(1.5)

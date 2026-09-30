@@ -59,6 +59,10 @@ PRICING: dict[str, Pricing] = {
     "claude-sonnet-5-5": Pricing(input=2.0, output=10.0, cache_read=0.20, cache_write=2.5),
     "claude-haiku-4-5": Pricing(input=1.0, output=5.0, cache_read=0.10, cache_write=1.25),
     "claude-fable-5-1": Pricing(input=10.0, output=50.0, cache_read=0.25, cache_write=12.5),
+    # DeepSeek charges less off-peak; peak rates are used so cost budgets
+    # stop a run early rather than late. There is no separate cache-write fee.
+    "deepseek-v4-pro": Pricing(input=1.32, output=3.96, cache_read=0.044, cache_write=1.32),
+    "deepseek-flash": Pricing(input=0.30, output=1.20, cache_read=0.006, cache_write=0.30),
 }
 
 
