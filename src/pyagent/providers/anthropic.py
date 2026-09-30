@@ -49,6 +49,9 @@ class AnthropicProvider:
     and returns the final assembled message.
     """
 
+    service_name = "Anthropic"
+    auth_hint = "set ANTHROPIC_API_KEY or run `ant auth login`"
+
     def __init__(
         self,
         model: str = DEFAULT_MODEL,
@@ -89,12 +92,10 @@ class AnthropicProvider:
     def complete(self, request: ModelRequest) -> ModelResponse:
         params = self.build_params(request)
         try:
-            with self.client.beta.messages.stream(**params) as stream:
+            with self._stream(params) as stream:
                 message = stream.get_final_message()
         except anthropic.AuthenticationError as exc:
-            raise ProviderError(
-                "authentication failed: set ANTHROPIC_API_KEY or run `ant auth login`"
-            ) from exc
+            raise ProviderError(f"authentication failed: {self.auth_hint}") from exc
         except anthropic.RateLimitError as exc:
             raise ProviderError("rate limited by the API after retries; try again later") from exc
         except anthropic.BadRequestError as exc:
@@ -102,5 +103,9 @@ class AnthropicProvider:
         except anthropic.APIStatusError as exc:
             raise ProviderError(f"API error {exc.status_code}: {exc.message}") from exc
         except anthropic.APIConnectionError as exc:
-            raise ProviderError("could not reach the Anthropic API") from exc
+            raise ProviderError(f"could not reach the {self.service_name} API") from exc
         return to_model_response(message)
+
+    def _stream(self, params: dict[str, Any]) -> Any:
+        # The beta namespace carries the server-side fallback parameters.
+        return self.client.beta.messages.stream(**params)
