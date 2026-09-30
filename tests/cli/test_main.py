@@ -11,12 +11,15 @@ from pyagent.cli.main import (
     IO,
     apply_overrides,
     build_parser,
+    default_provider,
     main,
 )
 from pyagent.cli.starter import STARTER_CONFIG
 from pyagent.config import CONFIG_FILENAME, Config, parse_config
 from pyagent.errors import ConfigError
 from pyagent.messages import ModelResponse
+from pyagent.providers.anthropic import AnthropicProvider
+from pyagent.providers.deepseek import DeepSeekProvider
 from pyagent.providers.scripted import ScriptedProvider, text_turn, tool_turn
 from pyagent.safety.modes import ApprovalMode
 
@@ -265,3 +268,28 @@ def test_json_mode_never_prompts(tmp_path: Path) -> None:
     assert "approval needed" not in term.out
     assert not (tmp_path / "a.txt").exists()
     json.loads(term.out)
+
+
+def test_default_provider_is_deepseek(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-test-not-real")
+    provider = default_provider(Config())
+    assert isinstance(provider, DeepSeekProvider)
+    assert provider.model == "deepseek-v4-pro"
+
+
+def test_provider_flag_switches_to_anthropic() -> None:
+    args = build_parser().parse_args(["run", "t", "--provider", "anthropic"])
+    config = apply_overrides(Config(), args)
+    provider = default_provider(config)
+    assert isinstance(provider, AnthropicProvider)
+    assert not isinstance(provider, DeepSeekProvider)
+    assert provider.model == "claude-opus-5-5"
+
+
+def test_missing_deepseek_key_is_a_usage_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    term = Term()
+    assert main(["run", "hi", "-w", str(tmp_path)], io=term.io) == EXIT_USAGE
+    assert "DEEPSEEK_API_KEY is not set" in term.err
