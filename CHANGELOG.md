@@ -7,6 +7,9 @@ All notable changes to pyagent are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- DeepSeek support (`deepseek-v4-pro`, `deepseek-flash`) through DeepSeek's
+  Anthropic-compatible API, now the default provider. Select with
+  `[model] provider` or `--provider`; the key comes from `DEEPSEEK_API_KEY`.
 - `pyagent doctor` checks Python, credentials (presence only), shell, config,
   and workspace permissions.
 - `pyagent run --json` prints a single machine-readable result and never prompts.

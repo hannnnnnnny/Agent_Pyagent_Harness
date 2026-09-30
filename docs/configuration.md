@@ -22,9 +22,14 @@ workspace, cannot be a protected file, and is capped at 32 KiB.
 
 | Key | Type | Default | Meaning |
 |---|---|---|---|
-| `name` | string | `claude-opus-5-5` | Model id |
+| `provider` | string | `deepseek` | `deepseek` or `anthropic` |
+| `name` | string | provider default | Model id; defaults to `deepseek-v4-pro` or `claude-opus-5-5` (`deepseek-flash` is the cheaper DeepSeek model) |
 | `effort` | string | `high` | `low`, `medium`, `high`, `xhigh`, or `max` |
 | `max_tokens` | integer | `64000` | Output cap per model turn |
+
+Keys are read from the environment only: `DEEPSEEK_API_KEY` for DeepSeek, and
+`ANTHROPIC_API_KEY` (or an `ant auth login` profile) for Anthropic. Cost
+budgets use DeepSeek's peak-hour prices, so estimates err on the high side.
 
 ## `[safety]`
 

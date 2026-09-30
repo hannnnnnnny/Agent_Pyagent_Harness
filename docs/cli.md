@@ -11,7 +11,8 @@ Run one task to completion and print the answer plus a summary line.
 | Flag | Meaning |
 |---|---|
 | `--mode {read-only,ask,auto-edit,unattended}` | Approval mode for this run |
-| `--model ID` | Model id, e.g. `claude-opus-5-5` |
+| `--provider {deepseek,anthropic}` | Model provider for this run |
+| `--model ID` | Model id, e.g. `deepseek-flash` or `claude-opus-5-5` |
 | `--effort {low,medium,high,xhigh,max}` | Reasoning effort |
 | `--max-turns N` | Stop after N model turns |
 | `--max-cost USD` | Stop once the estimated cost reaches USD |

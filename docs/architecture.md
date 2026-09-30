@@ -81,6 +81,11 @@ are both plain subscribers; a failing subscriber cannot break a run.
 `AnthropicProvider` streams every request (so large `max_tokens` values don't
 hit HTTP timeouts), uses adaptive thinking with a configurable effort level,
 enables prompt caching, turns on server-side refusal fallbacks, and maps SDK
-errors to `ProviderError` with actionable messages. `ScriptedProvider` replays
+errors to `ProviderError` with actionable messages. `DeepSeekProvider` (the
+default) reuses the same code against DeepSeek's Anthropic-compatible endpoint
+(`https://api.deepseek.com/anthropic`) with `DEEPSEEK_API_KEY`, sending only the
+fields DeepSeek supports (no betas, fallbacks, or cache control). Because the
+wire format is the same, history, tool calls, and thinking blocks need no
+translation. `ScriptedProvider` replays
 canned turns and records requests, which is how the whole system is tested
 without network access.

@@ -3,7 +3,7 @@
 [![CI](https://github.com/hannnnnnnny/Agent_Pyagent_Harness/actions/workflows/ci.yml/badge.svg)](https://github.com/hannnnnnnny/Agent_Pyagent_Harness/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/hannnnnnnny/Agent_Pyagent_Harness/actions/workflows/codeql.yml/badge.svg)](https://github.com/hannnnnnnny/Agent_Pyagent_Harness/actions/workflows/codeql.yml)
 
-A powerful, safety-first agent harness for Claude, written in Python.
+A powerful, safety-first agent harness for DeepSeek and Claude models, written in Python.
 
 pyagent gives Claude real tools (files, search, and a shell) inside a single
 workspace directory, and puts a layered safety system between the model and
@@ -25,8 +25,18 @@ you ──task──▶ Agent loop ──request──▶ Claude
 pip install -e ".[dev]"
 ```
 
-Python 3.10 or newer. Credentials come from `ANTHROPIC_API_KEY` or an
-`ant auth login` profile; pyagent never stores keys.
+Python 3.10 or newer. pyagent uses **DeepSeek** by default (`deepseek-v4-pro`
+via DeepSeek's Anthropic-compatible API). Put your key in an environment
+variable; pyagent reads it from there and never stores it:
+
+```bash
+export DEEPSEEK_API_KEY=...        # PowerShell: $env:DEEPSEEK_API_KEY = "..."
+pyagent doctor                     # confirms the key is visible (without printing it)
+```
+
+To use Claude instead, set `provider = "anthropic"` under `[model]` in
+`pyagent.toml` (or pass `--provider anthropic`) and provide `ANTHROPIC_API_KEY`
+or an `ant auth login` profile.
 
 ## Quick start
 
