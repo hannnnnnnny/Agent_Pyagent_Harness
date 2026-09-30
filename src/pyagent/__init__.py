@@ -1,4 +1,4 @@
-"""pyagent: a powerful, safety-first agent harness for Claude."""
+"""pyagent: a powerful, safety-first agent harness for DeepSeek and Claude models."""
 
 from pyagent.agent import Agent, RunResult
 from pyagent.budget import Budget
