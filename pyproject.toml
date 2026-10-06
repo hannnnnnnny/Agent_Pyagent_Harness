@@ -26,7 +26,7 @@ classifiers = [
   "Topic :: Software Development",
   "Typing :: Typed",
 ]
-dependencies = ["anthropic>=1.9", "tomli>=2.0; python_version < '3.11'"]
+dependencies = ["anthropic>=1.9", "tomli>=2.4.1; python_version < '3.11'"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pyagent"]
