@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import pytest
 
-from pyagent.errors import PolicyViolation
-from pyagent.safety.net import parse_target, resolve_public
+from guardrun.errors import PolicyViolation
+from guardrun.safety.net import parse_target, resolve_public
 
 LOOPBACK_AND_PRIVATE_FORMS = [
     "http://127.0.0.1/",

@@ -2,7 +2,7 @@ import io
 
 import pytest
 
-from pyagent.safety.approval import (
+from guardrun.safety.approval import (
     ApprovalRequest,
     Choice,
     ConsoleApprover,

@@ -3,11 +3,11 @@ from typing import Any
 
 import pytest
 
-from pyagent.errors import ApprovalDenied, ToolError
-from pyagent.messages import ToolCall
-from pyagent.tools.base import Tool, ToolContext
-from pyagent.tools.executor import ToolExecutor
-from pyagent.tools.registry import ToolRegistry
+from guardrun.errors import ApprovalDenied, ToolError
+from guardrun.messages import ToolCall
+from guardrun.tools.base import Tool, ToolContext
+from guardrun.tools.executor import ToolExecutor
+from guardrun.tools.registry import ToolRegistry
 
 
 class Echo(Tool):

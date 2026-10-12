@@ -13,12 +13,12 @@ import sys
 import tempfile
 from pathlib import Path
 
-from pyagent import AgentOptions, ApprovalMode, build_agent
-from pyagent.cli.render import ConsoleRenderer, format_result
-from pyagent.errors import PolicyViolation
-from pyagent.messages import ToolCall
-from pyagent.providers.scripted import ScriptedProvider, text_turn, tool_turn
-from pyagent.tools import Risk, Tool
+from guardrun import AgentOptions, ApprovalMode, build_agent
+from guardrun.cli.render import ConsoleRenderer, format_result
+from guardrun.errors import PolicyViolation
+from guardrun.messages import ToolCall
+from guardrun.providers.scripted import ScriptedProvider, text_turn, tool_turn
+from guardrun.tools import Risk, Tool
 
 
 def protect_migrations(tool: Tool, call: ToolCall) -> None:

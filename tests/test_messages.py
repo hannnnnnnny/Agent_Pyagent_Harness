@@ -1,7 +1,7 @@
 import pytest
 
-from pyagent.messages import Conversation, ModelResponse, ToolCall, ToolResult
-from pyagent.usage import Usage
+from guardrun.messages import Conversation, ModelResponse, ToolCall, ToolResult
+from guardrun.usage import Usage
 
 
 def _response() -> ModelResponse:

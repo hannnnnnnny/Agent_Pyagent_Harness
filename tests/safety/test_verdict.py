@@ -1,4 +1,4 @@
-from pyagent.safety.verdict import Assessment, Verdict, strictest
+from guardrun.safety.verdict import Assessment, Verdict, strictest
 
 
 def test_verdicts_are_ordered_by_strictness() -> None:

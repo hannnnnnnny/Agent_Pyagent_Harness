@@ -1,7 +1,7 @@
 from typing import Any
 
-from pyagent.report import summarize_runs
-from pyagent.usage import Usage
+from guardrun.report import summarize_runs
+from guardrun.usage import Usage
 
 
 def rec(run: str, kind: str, **data: Any) -> dict[str, Any]:

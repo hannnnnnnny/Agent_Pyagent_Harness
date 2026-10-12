@@ -5,14 +5,14 @@ from typing import Any
 
 import pytest
 
-from pyagent.dispatch import Dispatcher
-from pyagent.events import Event, EventBus
-from pyagent.messages import ToolCall
-from pyagent.safety.risk import Risk
-from pyagent.tools.base import Tool, ToolContext
-from pyagent.tools.builtin import file_tools
-from pyagent.tools.executor import ToolExecutor
-from pyagent.tools.registry import ToolRegistry
+from guardrun.dispatch import Dispatcher
+from guardrun.events import Event, EventBus
+from guardrun.messages import ToolCall
+from guardrun.safety.risk import Risk
+from guardrun.tools.base import Tool, ToolContext
+from guardrun.tools.builtin import file_tools
+from guardrun.tools.executor import ToolExecutor
+from guardrun.tools.registry import ToolRegistry
 
 
 def make(root: Path, **kwargs: int) -> tuple[Dispatcher, list[Event]]:

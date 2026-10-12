@@ -1,6 +1,6 @@
 import pytest
 
-from pyagent import errors
+from guardrun import errors
 
 
 @pytest.mark.parametrize(
@@ -17,7 +17,7 @@ from pyagent import errors
     ],
 )
 def test_all_errors_derive_from_base(exc: type[Exception]) -> None:
-    assert issubclass(exc, errors.PyAgentError)
+    assert issubclass(exc, errors.GuardRunError)
 
 
 def test_safety_errors_share_a_base() -> None:

@@ -1,5 +1,5 @@
 name: Bug report
-description: Something in pyagent does not work as documented.
+description: Something in guardrun does not work as documented.
 labels: [bug]
 body:
   - type: markdown
@@ -23,8 +23,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: pyagent version
-      placeholder: "output of `pyagent --version`"
+      label: guardrun version
+      placeholder: "output of `guardrun --version`"
     validations:
       required: true
   - type: input

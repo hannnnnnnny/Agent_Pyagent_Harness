@@ -1,6 +1,6 @@
 import pytest
 
-from pyagent.safety.shell_parse import ShellParseError, parse_command
+from guardrun.safety.shell_parse import ShellParseError, parse_command
 
 
 def test_simple_command() -> None:

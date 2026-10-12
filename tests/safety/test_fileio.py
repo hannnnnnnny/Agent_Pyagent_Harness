@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.errors import ToolError
-from pyagent.safety.fileio import is_binary, read_text, write_text
+from guardrun.errors import ToolError
+from guardrun.safety.fileio import is_binary, read_text, write_text
 
 
 def test_is_binary_detects_nul_bytes() -> None:

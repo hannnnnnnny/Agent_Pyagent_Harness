@@ -1,4 +1,4 @@
-from pyagent.prompts import DEFAULT_SYSTEM_PROMPT, build_system_prompt
+from guardrun.prompts import DEFAULT_SYSTEM_PROMPT, build_system_prompt
 
 
 def test_default_prompt_covers_safety_rules() -> None:

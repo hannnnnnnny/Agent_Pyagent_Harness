@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.cli.main import (
+from guardrun.cli.main import (
     EXIT_INCOMPLETE,
     EXIT_OK,
     EXIT_USAGE,
@@ -14,14 +14,14 @@ from pyagent.cli.main import (
     default_provider,
     main,
 )
-from pyagent.cli.starter import STARTER_CONFIG
-from pyagent.config import CONFIG_FILENAME, Config, parse_config
-from pyagent.errors import ConfigError
-from pyagent.messages import ModelResponse
-from pyagent.providers.anthropic import AnthropicProvider
-from pyagent.providers.deepseek import DeepSeekProvider
-from pyagent.providers.scripted import ScriptedProvider, text_turn, tool_turn
-from pyagent.safety.modes import ApprovalMode
+from guardrun.cli.starter import STARTER_CONFIG
+from guardrun.config import CONFIG_FILENAME, Config, parse_config
+from guardrun.errors import ConfigError
+from guardrun.messages import ModelResponse
+from guardrun.providers.anthropic import AnthropicProvider
+from guardrun.providers.deepseek import DeepSeekProvider
+from guardrun.providers.scripted import ScriptedProvider, text_turn, tool_turn
+from guardrun.safety.modes import ApprovalMode
 
 try:
     import tomllib

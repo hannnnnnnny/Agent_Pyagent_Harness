@@ -1,6 +1,6 @@
 import pytest
 
-from pyagent.tools.builtin.multi_edit import MultiEdit
+from guardrun.tools.builtin.multi_edit import MultiEdit
 from tests.tools.conftest import Runner
 
 tool = MultiEdit()

@@ -7,9 +7,9 @@ import anthropic
 import httpx2
 import pytest
 
-from pyagent.errors import ProviderError
-from pyagent.providers.base import ModelRequest
-from pyagent.providers.deepseek import (
+from guardrun.errors import ProviderError
+from guardrun.providers.base import ModelRequest
+from guardrun.providers.deepseek import (
     API_KEY_ENV,
     DEEPSEEK_BASE_URL,
     DEFAULT_DEEPSEEK_MODEL,

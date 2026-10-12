@@ -1,7 +1,7 @@
 import pytest
 
-from pyagent.safety.command_rules import ask_rules, block_rules, effective_argv, program_name
-from pyagent.safety.verdict import Verdict
+from guardrun.safety.command_rules import ask_rules, block_rules, effective_argv, program_name
+from guardrun.safety.verdict import Verdict
 
 
 @pytest.mark.parametrize(

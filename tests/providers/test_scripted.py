@@ -1,8 +1,8 @@
 import pytest
 
-from pyagent.errors import ProviderError
-from pyagent.providers.base import ModelRequest
-from pyagent.providers.scripted import ScriptedProvider, text_turn, tool_turn
+from guardrun.errors import ProviderError
+from guardrun.providers.base import ModelRequest
+from guardrun.providers.scripted import ScriptedProvider, text_turn, tool_turn
 
 REQUEST = ModelRequest(system="s", messages=[{"role": "user", "content": "hi"}])
 

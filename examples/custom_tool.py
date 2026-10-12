@@ -1,4 +1,4 @@
-"""Add your own tool to pyagent.
+"""Add your own tool to guardrun.
 
 Tools declare a JSON schema (validated before every call), a risk level (which
 drives approvals), and a ``run`` method. Raise ``ToolError`` for failures the
@@ -14,11 +14,11 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from pyagent import AgentOptions, build_agent
-from pyagent.cli.render import ConsoleRenderer, format_result
-from pyagent.errors import ToolError
-from pyagent.providers.scripted import ScriptedProvider, text_turn, tool_turn
-from pyagent.tools import Risk, Tool, ToolContext
+from guardrun import AgentOptions, build_agent
+from guardrun.cli.render import ConsoleRenderer, format_result
+from guardrun.errors import ToolError
+from guardrun.providers.scripted import ScriptedProvider, text_turn, tool_turn
+from guardrun.tools import Risk, Tool, ToolContext
 
 
 class WordCount(Tool):

@@ -1,6 +1,6 @@
-from pyagent.tools.base import Risk
-from pyagent.tools.builtin import default_tools, file_tools, read_only_tools
-from pyagent.tools.registry import ToolRegistry
+from guardrun.tools.base import Risk
+from guardrun.tools.builtin import default_tools, file_tools, read_only_tools
+from guardrun.tools.registry import ToolRegistry
 
 
 def test_read_only_set_never_writes() -> None:

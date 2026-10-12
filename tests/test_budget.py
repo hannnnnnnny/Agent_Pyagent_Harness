@@ -1,8 +1,8 @@
 import pytest
 
-from pyagent.budget import Budget, BudgetTracker
-from pyagent.errors import BudgetExceeded
-from pyagent.usage import Usage
+from guardrun.budget import Budget, BudgetTracker
+from guardrun.errors import BudgetExceeded
+from guardrun.usage import Usage
 
 
 def test_turn_limit() -> None:

@@ -1,6 +1,6 @@
 # Security model
 
-pyagent runs actions chosen by a language model on your machine. Model output
+GuardRun runs actions chosen by a language model on your machine. Model output
 is treated as **untrusted input** everywhere, and several independent layers
 limit what it can do. This document describes each layer and, just as
 importantly, what it does not protect against.
@@ -30,10 +30,10 @@ are rejected at registration rather than being half-checked.
 - **Protected paths** apply at any depth, case-insensitively:
   - never readable: `.env*`, private keys (`*.pem`, `*.key`, `id_rsa*`, ...),
     `.ssh/`, `.aws/`, `.netrc`, `.npmrc`, `.pypirc`, `.git-credentials`,
-    `.git/config`, and pyagent's own state in `.pyagent/`;
+    `.git/config`, and GuardRun's own state in `.guardrun/`;
   - additionally never writable: everything under `.git/`.
   `glob`, `grep`, and `list_dir` skip protected files entirely, so they cannot
-  be used to discover or read them. `.pyagent/` and `.git/` cannot be
+  be used to discover or read them. `.guardrun/` and `.git/` cannot be
   unprotected by configuration.
 - Reads are size-capped and refuse binaries; writes are size-capped and atomic.
 
@@ -106,7 +106,7 @@ The system prompt also tells the model that tool results are data, not instructi
 
 - Budgets stop runs after a number of turns, tokens, or dollars.
 - A run that keeps failing is stopped as `stuck`.
-- Every event is written, redacted, to `.pyagent/audit.jsonl` (mode `0600` on
+- Every event is written, redacted, to `.guardrun/audit.jsonl` (mode `0600` on
   POSIX). The agent cannot read or write this directory.
 
 ## Adversarial test suite
@@ -126,7 +126,7 @@ first, as failing tests.
   Globs, variables, `eval`, interpreters (`python -c`), or scripts can reach
   things the parser cannot see. That is why unknown commands default to
   *ask*, and why you should only pre-approve commands you trust with arbitrary
-  arguments. For untrusted workloads run pyagent inside a container or VM.
+  arguments. For untrusted workloads run GuardRun inside a container or VM.
 - Redaction is pattern-based and can miss secrets in unusual formats that are
   not also present in the environment.
 - Injection flagging is a heuristic. It raises the model's suspicion; it is not

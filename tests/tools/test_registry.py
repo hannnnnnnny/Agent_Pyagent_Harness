@@ -2,8 +2,8 @@ from typing import Any
 
 import pytest
 
-from pyagent.tools.base import Tool, ToolContext
-from pyagent.tools.registry import ToolRegistry
+from guardrun.tools.base import Tool, ToolContext
+from guardrun.tools.registry import ToolRegistry
 
 
 def make_tool(name: str, schema: dict[str, Any] | None = None, description: str = "d") -> Tool:

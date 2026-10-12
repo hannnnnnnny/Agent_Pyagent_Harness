@@ -2,8 +2,8 @@ from collections.abc import Callable
 
 import pytest
 
-from pyagent.errors import PolicyViolation
-from pyagent.safety.net import Target, is_public_address, parse_target, resolve_public
+from guardrun.errors import PolicyViolation
+from guardrun.safety.net import Target, is_public_address, parse_target, resolve_public
 
 
 @pytest.mark.parametrize(

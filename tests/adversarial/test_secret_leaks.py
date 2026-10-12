@@ -12,11 +12,11 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.factory import STATE_DIR, AgentOptions, build_agent
-from pyagent.messages import ModelResponse
-from pyagent.providers.scripted import ScriptedProvider, text_turn, tool_turn
-from pyagent.safety.command_policy import CommandPolicy
-from pyagent.safety.modes import ApprovalMode
+from guardrun.factory import STATE_DIR, AgentOptions, build_agent
+from guardrun.messages import ModelResponse
+from guardrun.providers.scripted import ScriptedProvider, text_turn, tool_turn
+from guardrun.safety.command_policy import CommandPolicy
+from guardrun.safety.modes import ApprovalMode
 
 ENV_SECRET = "env-canary-9f8e7d6c5b4a"
 FILE_SECRET = "ghp_" + "Z" * 36

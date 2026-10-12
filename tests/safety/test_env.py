@@ -1,4 +1,4 @@
-from pyagent.safety.env import scrub_env
+from guardrun.safety.env import scrub_env
 
 SOURCE = {
     "PATH": "/usr/bin",
@@ -28,8 +28,8 @@ def test_secret_names_are_dropped_even_if_allowlisted() -> None:
 
 
 def test_extra_variables_are_added() -> None:
-    env = scrub_env(SOURCE, extra={"PYAGENT": "1"})
-    assert env["PYAGENT"] == "1"
+    env = scrub_env(SOURCE, extra={"GUARDRUN": "1"})
+    assert env["GUARDRUN"] == "1"
 
 
 def test_source_is_not_mutated() -> None:

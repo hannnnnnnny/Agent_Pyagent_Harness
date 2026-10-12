@@ -2,10 +2,10 @@ import sys
 
 import pytest
 
-from pyagent.safety.command_policy import CommandPolicy
-from pyagent.safety.verdict import Verdict
-from pyagent.tools.base import Risk
-from pyagent.tools.builtin.run_shell import RunShell
+from guardrun.safety.command_policy import CommandPolicy
+from guardrun.safety.verdict import Verdict
+from guardrun.tools.base import Risk
+from guardrun.tools.builtin.run_shell import RunShell
 from tests.tools.conftest import Runner
 
 PY = sys.executable.replace("\\", "/")
@@ -30,7 +30,7 @@ def test_failure_exit_code_is_reported(run: Runner) -> None:
 
 def test_secrets_are_not_inherited(run: Runner, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-should-not-leak")
-    code = "import os; print(os.environ.get('ANTHROPIC_API_KEY'), os.environ.get('PYAGENT'))"
+    code = "import os; print(os.environ.get('ANTHROPIC_API_KEY'), os.environ.get('GUARDRUN'))"
     result = run(tool, command=f'"{PY}" -c "{code}"')
     assert "sk-ant-should-not-leak" not in result.content
     assert "None 1" in result.content

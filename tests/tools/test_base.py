@@ -3,8 +3,8 @@ from typing import Any
 
 import pytest
 
-from pyagent.safety.verdict import Verdict
-from pyagent.tools.base import Risk, Tool, ToolContext
+from guardrun.safety.verdict import Verdict
+from guardrun.tools.base import Risk, Tool, ToolContext
 
 
 class Echo(Tool):

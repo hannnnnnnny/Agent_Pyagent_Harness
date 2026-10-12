@@ -1,4 +1,4 @@
-from pyagent.events import Event, EventBus
+from guardrun.events import Event, EventBus
 
 
 def test_emit_delivers_to_all_subscribers() -> None:

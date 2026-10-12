@@ -2,21 +2,21 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.config import parse_config
-from pyagent.errors import ConfigError, PolicyViolation
-from pyagent.factory import (
+from guardrun.config import parse_config
+from guardrun.errors import ConfigError, PolicyViolation
+from guardrun.factory import (
     STATE_DIR,
     AgentOptions,
     build_agent,
     options_from_config,
     protected_paths_from,
 )
-from pyagent.messages import Conversation, ToolCall
-from pyagent.providers.scripted import ScriptedProvider, text_turn, tool_turn
-from pyagent.safety.approval import Choice, ScriptedApprover
-from pyagent.safety.audit import read_audit
-from pyagent.safety.modes import ApprovalMode
-from pyagent.tools.base import Tool
+from guardrun.messages import Conversation, ToolCall
+from guardrun.providers.scripted import ScriptedProvider, text_turn, tool_turn
+from guardrun.safety.approval import Choice, ScriptedApprover
+from guardrun.safety.audit import read_audit
+from guardrun.safety.modes import ApprovalMode
+from guardrun.tools.base import Tool
 
 
 def test_default_agent_cannot_write_without_approval(tmp_path: Path) -> None:
@@ -74,7 +74,7 @@ def test_agent_cannot_read_its_own_audit_log(tmp_path: Path) -> None:
     provider = ScriptedProvider(
         [
             text_turn("first"),
-            tool_turn(("read_file", {"path": ".pyagent/audit.jsonl"})),
+            tool_turn(("read_file", {"path": ".guardrun/audit.jsonl"})),
             text_turn("ok"),
         ]
     )
@@ -115,7 +115,7 @@ def test_options_from_config() -> None:
     assert options.instructions == "Be brief."
 
 
-@pytest.mark.parametrize("pattern", [".pyagent/**", "./.git/config", ".git/**"])
+@pytest.mark.parametrize("pattern", [".guardrun/**", "./.git/config", ".git/**"])
 def test_state_and_git_can_never_be_unprotected(pattern: str) -> None:
     with pytest.raises(ConfigError, match="refusing to unprotect"):
         protected_paths_from((), (pattern,))

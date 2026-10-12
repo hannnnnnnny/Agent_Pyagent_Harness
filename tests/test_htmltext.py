@@ -1,4 +1,4 @@
-from pyagent.htmltext import html_to_text
+from guardrun.htmltext import html_to_text
 
 
 def test_title_and_paragraphs() -> None:

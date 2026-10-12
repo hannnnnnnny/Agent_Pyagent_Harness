@@ -8,14 +8,14 @@ import httpx2
 import pytest
 from anthropic.types.beta import BetaMessage
 
-from pyagent.errors import ProviderError
-from pyagent.providers.anthropic import (
+from guardrun.errors import ProviderError
+from guardrun.providers.anthropic import (
     DEFAULT_MODEL,
     FALLBACK_BETA,
     AnthropicProvider,
     to_model_response,
 )
-from pyagent.providers.base import ModelRequest
+from guardrun.providers.base import ModelRequest
 
 MESSAGE = BetaMessage.model_validate(
     {

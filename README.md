@@ -1,11 +1,11 @@
-# pyagent
+# GuardRun
 
-[![CI](https://github.com/hannnnnnnny/Agent_Pyagent_Harness/actions/workflows/ci.yml/badge.svg)](https://github.com/hannnnnnnny/Agent_Pyagent_Harness/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/hannnnnnnny/Agent_Pyagent_Harness/actions/workflows/codeql.yml/badge.svg)](https://github.com/hannnnnnnny/Agent_Pyagent_Harness/actions/workflows/codeql.yml)
+[![CI](https://github.com/hannnnnnnny/GuardRun/actions/workflows/ci.yml/badge.svg)](https://github.com/hannnnnnnny/GuardRun/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/hannnnnnnny/GuardRun/actions/workflows/codeql.yml/badge.svg)](https://github.com/hannnnnnnny/GuardRun/actions/workflows/codeql.yml)
 
 A powerful, safety-first agent harness for DeepSeek and Claude models, written in Python.
 
-pyagent gives Claude real tools (files, search, and a shell) inside a single
+GuardRun gives Claude real tools (files, search, and a shell) inside a single
 workspace directory, and puts a layered safety system between the model and
 your machine: a path sandbox, a shell command policy, approval modes, secret
 redaction, prompt-injection flagging, budgets, and an audit log.
@@ -25,28 +25,28 @@ you ──task──▶ Agent loop ──request──▶ Claude
 pip install -e ".[dev]"
 ```
 
-Python 3.10 or newer. pyagent uses **DeepSeek** by default (`deepseek-v4-pro`
+Python 3.10 or newer. GuardRun uses **DeepSeek** by default (`deepseek-v4-pro`
 via DeepSeek's Anthropic-compatible API). Put your key in an environment
-variable; pyagent reads it from there and never stores it:
+variable; GuardRun reads it from there and never stores it:
 
 ```bash
 export DEEPSEEK_API_KEY=...        # PowerShell: $env:DEEPSEEK_API_KEY = "..."
-pyagent doctor                     # confirms the key is visible (without printing it)
+guardrun doctor                    # confirms the key is visible (without printing it)
 ```
 
 To use Claude instead, set `provider = "anthropic"` under `[model]` in
-`pyagent.toml` (or pass `--provider anthropic`) and provide `ANTHROPIC_API_KEY`
+`guardrun.toml` (or pass `--provider anthropic`) and provide `ANTHROPIC_API_KEY`
 or an `ant auth login` profile.
 
 ## Quick start
 
 ```bash
-pyagent init                                   # optional: write pyagent.toml
-pyagent run "add type hints to utils.py and run the tests"
-pyagent chat                                   # multi-turn session
-pyagent run "continue" --resume 3f2a9c1b7d4e   # pick a session back up
-pyagent usage                                  # tokens and cost of recent runs
-pyagent policy "rm -rf build"                  # how would this command be treated?
+guardrun init                                  # optional: write guardrun.toml
+guardrun run "add type hints to utils.py and run the tests"
+guardrun chat                                  # multi-turn session
+guardrun run "continue" --resume 3f2a9c1b7d4e  # pick a session back up
+guardrun usage                                 # tokens and cost of recent runs
+guardrun policy "rm -rf build"                 # how would this command be treated?
 ```
 
 When the agent wants to do something risky it asks first:
@@ -86,12 +86,12 @@ or reading `.env`) can never be approved in any mode.
 | `run_shell` | execute | Policy-checked shell command with a scrubbed environment |
 | `web_fetch` | network | Opt-in: fetch a public URL as text (SSRF-protected) |
 
-## Using pyagent from Python
+## Using GuardRun from Python
 
 ```python
-from pyagent import AgentOptions, ApprovalMode, Budget, build_agent
-from pyagent.providers.anthropic import AnthropicProvider
-from pyagent.safety import ConsoleApprover
+from guardrun import AgentOptions, ApprovalMode, Budget, build_agent
+from guardrun.providers.anthropic import AnthropicProvider
+from guardrun.safety import ConsoleApprover
 import sys
 
 agent = build_agent(
@@ -116,7 +116,7 @@ offline demo.
 
 - [Architecture](docs/architecture.md): how a run flows through the system
 - [Security model](docs/security-model.md): what is protected, how, and the known limits
-- [Configuration](docs/configuration.md): every `pyagent.toml` setting
+- [Configuration](docs/configuration.md): every `guardrun.toml` setting
 - [CLI reference](docs/cli.md): every command and flag
 - [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md) and [Security policy](SECURITY.md)

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.config import parse_config
+from guardrun.config import parse_config
 
 try:
     import tomllib

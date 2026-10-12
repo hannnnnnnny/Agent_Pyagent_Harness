@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.safety.walk import walk_files
-from pyagent.safety.workspace import Workspace
+from guardrun.safety.walk import walk_files
+from guardrun.safety.workspace import Workspace
 
 
 @pytest.fixture

@@ -1,6 +1,6 @@
 import pytest
 
-from pyagent.safety.redact import PLACEHOLDER, Redactor, secrets_from_env
+from guardrun.safety.redact import PLACEHOLDER, Redactor, secrets_from_env
 
 redactor = Redactor()
 

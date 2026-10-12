@@ -1,6 +1,6 @@
 import pytest
 
-from pyagent.safety.injection import NOTICE, looks_like_injection, make_injection_filter
+from guardrun.safety.injection import NOTICE, looks_like_injection, make_injection_filter
 
 
 @pytest.mark.parametrize(

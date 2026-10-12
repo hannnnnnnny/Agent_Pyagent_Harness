@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from pyagent.config import CONFIG_FILENAME
-from pyagent.doctor import (
+from guardrun.config import CONFIG_FILENAME
+from guardrun.doctor import (
     FAIL,
     OK,
     WARN,

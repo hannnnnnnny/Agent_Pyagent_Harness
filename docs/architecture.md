@@ -1,22 +1,22 @@
 # Architecture
 
-pyagent is a manual tool-use loop around the Anthropic Messages API, with every
+GuardRun is a manual tool-use loop around the Anthropic Messages API, with every
 tool call routed through one choke point where safety decisions are made.
 
 ## Package layout
 
 | Module | Responsibility |
 |---|---|
-| `pyagent.agent` | The loop: call the model, run requested tools, repeat |
-| `pyagent.factory` | `build_agent`: wires tools, gate, filters, audit into an `Agent` |
-| `pyagent.providers` | `Provider` protocol; `AnthropicProvider`; `ScriptedProvider` for tests |
-| `pyagent.messages` | Wire-shaped, append-only `Conversation`; `ModelResponse`, `ToolCall`, `ToolResult` |
-| `pyagent.tools` | `Tool` base class, schema validation, registry, executor, built-in tools |
-| `pyagent.safety` | Workspace sandbox, protected paths, command policy, approvals, redaction, audit |
-| `pyagent.budget` | Turn / token / cost limits |
-| `pyagent.config` | Strict `pyagent.toml` loader |
-| `pyagent.sessions` | Save and resume conversations |
-| `pyagent.cli` | The `pyagent` command |
+| `guardrun.agent` | The loop: call the model, run requested tools, repeat |
+| `guardrun.factory` | `build_agent`: wires tools, gate, filters, audit into an `Agent` |
+| `guardrun.providers` | `Provider` protocol; `AnthropicProvider`; `ScriptedProvider` for tests |
+| `guardrun.messages` | Wire-shaped, append-only `Conversation`; `ModelResponse`, `ToolCall`, `ToolResult` |
+| `guardrun.tools` | `Tool` base class, schema validation, registry, executor, built-in tools |
+| `guardrun.safety` | Workspace sandbox, protected paths, command policy, approvals, redaction, audit |
+| `guardrun.budget` | Turn / token / cost limits |
+| `guardrun.config` | Strict `guardrun.toml` loader |
+| `guardrun.sessions` | Save and resume conversations |
+| `guardrun.cli` | The `guardrun` command |
 
 The safety package never imports the agent loop, and only `safety.gate`
 depends on the tool framework. A test imports every module in isolation so

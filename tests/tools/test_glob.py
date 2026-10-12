@@ -1,7 +1,7 @@
 import pytest
 
-from pyagent.tools.builtin import glob as glob_module
-from pyagent.tools.builtin.glob import Glob
+from guardrun.tools.builtin import glob as glob_module
+from guardrun.tools.builtin.glob import Glob
 from tests.tools.conftest import Runner
 
 tool = Glob()

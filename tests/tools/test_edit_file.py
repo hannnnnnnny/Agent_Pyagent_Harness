@@ -1,6 +1,6 @@
 import pytest
 
-from pyagent.tools.builtin.edit_file import EditFile
+from guardrun.tools.builtin.edit_file import EditFile
 from tests.tools.conftest import Runner
 
 tool = EditFile()

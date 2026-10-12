@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pytest
 
-from pyagent import instructions
-from pyagent.errors import ConfigError
-from pyagent.instructions import combine_instructions, load_instructions_file
+from guardrun import instructions
+from guardrun.errors import ConfigError
+from guardrun.instructions import combine_instructions, load_instructions_file
 
 
 def test_loads_file_contents(tmp_path: Path) -> None:

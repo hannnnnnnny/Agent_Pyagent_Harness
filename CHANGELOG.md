@@ -1,18 +1,25 @@
 # Changelog
 
-All notable changes to pyagent are documented here. The format follows
+All notable changes to GuardRun are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- Renamed the project from pyagent to GuardRun, since the old name was already
+  taken on PyPI. The package is now `guardrun`, the command `guardrun`, the
+  config file `guardrun.toml`, the state directory `.guardrun/`, and child
+  processes see `GUARDRUN=1`. Rename an existing `pyagent.toml` and
+  `.pyagent/` to keep their settings and sessions.
+
 ### Added
 - DeepSeek support (`deepseek-v4-pro`, `deepseek-flash`) through DeepSeek's
   Anthropic-compatible API, now the default provider. Select with
   `[model] provider` or `--provider`; the key comes from `DEEPSEEK_API_KEY`.
-- `pyagent doctor` checks Python, credentials (presence only), shell, config,
+- `guardrun doctor` checks Python, credentials (presence only), shell, config,
   and workspace permissions.
-- `pyagent run --json` prints a single machine-readable result and never prompts.
+- `guardrun run --json` prints a single machine-readable result and never prompts.
 - `instructions_file` loads project guidance (e.g. `AGENTS.md`) through the sandbox.
 - `AgentOptions.extra_gates` for project-specific policy rules.
 - `limits.max_tool_output_chars` to tune how much tool output reaches the model.
@@ -45,7 +52,7 @@ First release: a safety-first agent harness for Claude.
 
 ### Safety
 - Workspace sandbox with symlink-aware containment and Windows path hardening.
-- Protected paths for credentials, `.git/`, and pyagent's own state.
+- Protected paths for credentials, `.git/`, and GuardRun's own state.
 - Shell command policy (allow / ask / block) with wrapper unwrapping, glob and
   variable handling, and paths hidden in flags and `@file` references.
 - Approval modes (`read-only`, `ask`, `auto-edit`, `unattended`) with a safety
@@ -57,10 +64,10 @@ First release: a safety-first agent harness for Claude.
 - An adversarial test suite of known escape and bypass attempts.
 
 ### Tooling
-- `pyagent` CLI: `run`, `chat`, `policy`, `audit`, `usage`, `sessions`, `init`.
-- Strict `pyagent.toml` configuration.
+- `guardrun` CLI: `run`, `chat`, `policy`, `audit`, `usage`, `sessions`, `init`.
+- Strict `guardrun.toml` configuration.
 - CI on Linux, macOS, and Windows for Python 3.10 to 3.14, a 95% coverage floor,
   CodeQL, and Dependabot.
 
-[Unreleased]: https://github.com/hannnnnnnny/Agent_Pyagent_Harness/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/hannnnnnnny/Agent_Pyagent_Harness/releases/tag/v0.1.0
+[Unreleased]: https://github.com/hannnnnnnny/GuardRun/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/hannnnnnnny/GuardRun/releases/tag/v0.1.0
