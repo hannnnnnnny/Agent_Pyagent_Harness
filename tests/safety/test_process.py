@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.safety.process import default_shell, run_command
+from guardrun.safety.process import default_shell, run_command
 
 PY = sys.executable.replace("\\", "/")
 

@@ -1,5 +1,5 @@
-from pyagent.tools.base import Risk
-from pyagent.tools.builtin.write_file import WriteFile
+from guardrun.tools.base import Risk
+from guardrun.tools.builtin.write_file import WriteFile
 from tests.tools.conftest import Runner
 
 tool = WriteFile()

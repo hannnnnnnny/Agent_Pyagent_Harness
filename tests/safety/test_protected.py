@@ -1,7 +1,7 @@
 import pytest
 
-from pyagent.errors import SandboxViolation
-from pyagent.safety.protected import ProtectedPaths
+from guardrun.errors import SandboxViolation
+from guardrun.safety.protected import ProtectedPaths
 
 rules = ProtectedPaths()
 
@@ -20,7 +20,7 @@ rules = ProtectedPaths()
         ".GIT/CONFIG",
         ".aws/credentials",
         ".ssh/known_hosts",
-        ".pyagent/audit.jsonl",
+        ".guardrun/audit.jsonl",
         "vendor/lib/.git/config",
         "nested/.aws/config",
     ],

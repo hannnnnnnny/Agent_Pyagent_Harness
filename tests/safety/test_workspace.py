@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.errors import SandboxViolation
-from pyagent.safety.workspace import Workspace
+from guardrun.errors import SandboxViolation
+from guardrun.safety.workspace import Workspace
 
 
 @pytest.fixture

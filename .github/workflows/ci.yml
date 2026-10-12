@@ -64,6 +64,6 @@ jobs:
         run: |
           python -m venv /tmp/wheel-env
           /tmp/wheel-env/bin/pip install dist/*.whl
-          /tmp/wheel-env/bin/pyagent --version
-          /tmp/wheel-env/bin/pyagent policy "sudo id" | grep -q '^BLOCK'
-          /tmp/wheel-env/bin/python -c "import pyagent, pathlib; assert (pathlib.Path(pyagent.__file__).parent / 'py.typed').exists()"
+          /tmp/wheel-env/bin/guardrun --version
+          /tmp/wheel-env/bin/guardrun policy "sudo id" | grep -q '^BLOCK'
+          /tmp/wheel-env/bin/python -c "import guardrun, pathlib; assert (pathlib.Path(guardrun.__file__).parent / 'py.typed').exists()"

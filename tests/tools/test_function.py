@@ -1,11 +1,11 @@
 from pathlib import Path
 from typing import Any
 
-from pyagent.messages import ToolCall
-from pyagent.tools.base import Risk, Tool, ToolContext
-from pyagent.tools.executor import ToolExecutor
-from pyagent.tools.function import function_tool
-from pyagent.tools.registry import ToolRegistry
+from guardrun.messages import ToolCall
+from guardrun.tools.base import Risk, Tool, ToolContext
+from guardrun.tools.executor import ToolExecutor
+from guardrun.tools.function import function_tool
+from guardrun.tools.registry import ToolRegistry
 
 SCHEMA = {
     "type": "object",

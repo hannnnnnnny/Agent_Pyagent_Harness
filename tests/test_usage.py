@@ -1,6 +1,6 @@
 import pytest
 
-from pyagent.usage import PRICING, Usage, estimate_cost
+from guardrun.usage import PRICING, Usage, estimate_cost
 
 
 def test_usage_addition_sums_every_field() -> None:

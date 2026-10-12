@@ -2,8 +2,8 @@ import re
 
 import pytest
 
-from pyagent.errors import ToolInputError
-from pyagent.tools.schema import check_schema, validate
+from guardrun.errors import ToolInputError
+from guardrun.tools.schema import check_schema, validate
 
 SCHEMA = {
     "type": "object",

@@ -3,9 +3,9 @@ from typing import Any
 
 import pytest
 
-from pyagent.config import CONFIG_FILENAME, Config, load_config, parse_config
-from pyagent.errors import ConfigError
-from pyagent.safety.modes import ApprovalMode
+from guardrun.config import CONFIG_FILENAME, Config, load_config, parse_config
+from guardrun.errors import ConfigError
+from guardrun.safety.modes import ApprovalMode
 
 FULL = """
 instructions = "Run pytest before finishing."

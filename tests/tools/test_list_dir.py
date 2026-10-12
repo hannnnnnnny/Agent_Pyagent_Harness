@@ -1,4 +1,4 @@
-from pyagent.tools.builtin.list_dir import ListDir
+from guardrun.tools.builtin.list_dir import ListDir
 from tests.tools.conftest import Runner
 
 tool = ListDir()

@@ -1,8 +1,8 @@
 import pytest
 
-from pyagent.safety.modes import ApprovalMode, effective_verdict, mode_assessment
-from pyagent.safety.verdict import Assessment, Verdict
-from pyagent.tools.base import Risk
+from guardrun.safety.modes import ApprovalMode, effective_verdict, mode_assessment
+from guardrun.safety.verdict import Assessment, Verdict
+from guardrun.tools.base import Risk
 
 A, Q, B = Verdict.ALLOW, Verdict.ASK, Verdict.BLOCK
 

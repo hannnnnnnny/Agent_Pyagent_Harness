@@ -1,8 +1,8 @@
 # Configuration
 
-pyagent reads `pyagent.toml` from the workspace root. Every key is optional.
+GuardRun reads `guardrun.toml` from the workspace root. Every key is optional.
 Unknown keys and wrong types are **errors**, so a typo in a safety setting is
-reported instead of silently falling back to a default. Run `pyagent init` to
+reported instead of silently falling back to a default. Run `guardrun init` to
 write a commented starter file.
 
 Command-line flags override the file: `--mode`, `--model`, `--effort`,
@@ -38,11 +38,11 @@ budgets use DeepSeek's peak-hour prices, so estimates err on the high side.
 | `mode` | string | `ask` | `read-only`, `ask`, `auto-edit`, or `unattended` |
 | `protect` | list of globs | `[]` | Extra paths the agent may never read or write |
 | `unprotect` | list of globs | `[]` | Exempt paths from the built-in secret rules |
-| `audit` | boolean | `true` | Write `.pyagent/audit.jsonl` |
+| `audit` | boolean | `true` | Write `.guardrun/audit.jsonl` |
 
 Glob rules match workspace-relative paths case-insensitively. A pattern ending
 in `/**` matches a directory at any depth; a pattern without `/` matches file
-names anywhere. `unprotect` cannot cover `.pyagent/` or `.git/`.
+names anywhere. `unprotect` cannot cover `.guardrun/` or `.git/`.
 
 ## `[shell]`
 
@@ -56,7 +56,7 @@ matches. Block and ask rules are checked first, so `allow = ["git"]` still asks
 before `git push`. Pre-approving an interpreter such as `python` effectively
 approves arbitrary code; prefer specific commands like `python -m pytest`.
 
-Use `pyagent policy "<command>"` to see how a command would be treated.
+Use `guardrun policy "<command>"` to see how a command would be treated.
 
 ## `[budget]`
 

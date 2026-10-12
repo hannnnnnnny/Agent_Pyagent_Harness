@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.messages import Conversation
-from pyagent.providers.scripted import text_turn
-from pyagent.sessions import SessionError, SessionStore, new_session_id, session_summary
+from guardrun.messages import Conversation
+from guardrun.providers.scripted import text_turn
+from guardrun.sessions import SessionError, SessionStore, new_session_id, session_summary
 
 
 def _conversation() -> Conversation:

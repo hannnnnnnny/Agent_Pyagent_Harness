@@ -1,10 +1,10 @@
 import io
 import json
 
-from pyagent.agent import RunResult
-from pyagent.cli.render import ConsoleRenderer, format_result, result_to_dict
-from pyagent.events import EventBus
-from pyagent.usage import Usage
+from guardrun.agent import RunResult
+from guardrun.cli.render import ConsoleRenderer, format_result, result_to_dict
+from guardrun.events import EventBus
+from guardrun.usage import Usage
 
 
 def _render(*events: tuple[str, dict[str, object]], verbose: bool = False) -> str:

@@ -8,8 +8,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import pytest
 
-from pyagent.errors import PolicyViolation, ToolError
-from pyagent.web import Fetcher, domain_allowed
+from guardrun.errors import PolicyViolation, ToolError
+from guardrun.web import Fetcher, domain_allowed
 
 PAGES: dict[str, tuple[int, dict[str, str], bytes]] = {
     "/page": (200, {"Content-Type": "text/html; charset=utf-8"}, b"<title>T</title><p>Hello</p>"),

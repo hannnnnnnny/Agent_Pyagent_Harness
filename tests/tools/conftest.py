@@ -3,10 +3,10 @@ from typing import Any
 
 import pytest
 
-from pyagent.messages import ToolCall, ToolResult
-from pyagent.tools.base import Tool, ToolContext
-from pyagent.tools.executor import ToolExecutor
-from pyagent.tools.registry import ToolRegistry
+from guardrun.messages import ToolCall, ToolResult
+from guardrun.tools.base import Tool, ToolContext
+from guardrun.tools.executor import ToolExecutor
+from guardrun.tools.registry import ToolRegistry
 
 
 class Runner:

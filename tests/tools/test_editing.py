@@ -1,7 +1,7 @@
 import pytest
 
-from pyagent.errors import ToolError
-from pyagent.tools.builtin.editing import match_line_endings, replace_exact
+from guardrun.errors import ToolError
+from guardrun.tools.builtin.editing import match_line_endings, replace_exact
 
 
 def test_lf_fragment_is_converted_for_crlf_text() -> None:

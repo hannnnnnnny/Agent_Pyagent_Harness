@@ -1,6 +1,6 @@
 import pytest
 
-from pyagent.text import truncate_middle
+from guardrun.text import truncate_middle
 
 
 def test_short_text_is_unchanged() -> None:

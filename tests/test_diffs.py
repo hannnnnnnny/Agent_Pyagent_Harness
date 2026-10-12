@@ -1,7 +1,7 @@
 import pytest
 
-from pyagent import diffs
-from pyagent.diffs import unified_diff
+from guardrun import diffs
+from guardrun.diffs import unified_diff
 
 
 def test_diff_shows_changed_lines() -> None:

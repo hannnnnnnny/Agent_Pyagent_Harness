@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.events import EventBus
-from pyagent.safety.audit import AuditLog, read_audit
-from pyagent.safety.redact import Redactor
+from guardrun.events import EventBus
+from guardrun.safety.audit import AuditLog, read_audit
+from guardrun.safety.redact import Redactor
 
 
 def test_records_are_appended_as_jsonl(tmp_path: Path) -> None:

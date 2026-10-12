@@ -11,13 +11,13 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.messages import ToolCall
-from pyagent.safety.gate import SafetyGate
-from pyagent.safety.modes import ApprovalMode
-from pyagent.tools.base import ToolContext
-from pyagent.tools.builtin import file_tools
-from pyagent.tools.executor import ToolExecutor
-from pyagent.tools.registry import ToolRegistry
+from guardrun.messages import ToolCall
+from guardrun.safety.gate import SafetyGate
+from guardrun.safety.modes import ApprovalMode
+from guardrun.tools.base import ToolContext
+from guardrun.tools.builtin import file_tools
+from guardrun.tools.executor import ToolExecutor
+from guardrun.tools.registry import ToolRegistry
 
 # A canary string; seeing it in any tool output means a sandbox leak.
 CANARY = "TOP-SECRET-CANARY"
@@ -88,7 +88,7 @@ def test_grep_cannot_search_outside(setup: tuple[ToolExecutor, Path]) -> None:
 
 @pytest.mark.parametrize(
     "path",
-    ["../planted.txt", ".git/hooks/pre-commit", ".GIT/config", ".pyagent/audit.jsonl", ".env"],
+    ["../planted.txt", ".git/hooks/pre-commit", ".GIT/config", ".guardrun/audit.jsonl", ".env"],
 )
 def test_write_attempts_are_refused(setup: tuple[ToolExecutor, Path], path: str) -> None:
     executor, tmp = setup

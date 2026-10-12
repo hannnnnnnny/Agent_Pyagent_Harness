@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.safety.command_policy import CommandPolicy, merge_allow_prefixes
-from pyagent.safety.verdict import Verdict
-from pyagent.safety.workspace import Workspace
+from guardrun.safety.command_policy import CommandPolicy, merge_allow_prefixes
+from guardrun.safety.verdict import Verdict
+from guardrun.safety.workspace import Workspace
 
 
 @pytest.fixture

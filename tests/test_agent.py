@@ -2,17 +2,17 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.agent import MAX_CONSECUTIVE_FAILED_TURNS, TRUNCATED_CALL_MESSAGE, Agent, RunResult
-from pyagent.budget import Budget
-from pyagent.errors import ProviderError
-from pyagent.events import Event, EventBus
-from pyagent.messages import ModelResponse
-from pyagent.providers.base import ModelRequest
-from pyagent.providers.scripted import ScriptedProvider, text_turn, tool_turn
-from pyagent.tools.base import ToolContext
-from pyagent.tools.builtin import file_tools
-from pyagent.tools.registry import ToolRegistry
-from pyagent.usage import Usage
+from guardrun.agent import MAX_CONSECUTIVE_FAILED_TURNS, TRUNCATED_CALL_MESSAGE, Agent, RunResult
+from guardrun.budget import Budget
+from guardrun.errors import ProviderError
+from guardrun.events import Event, EventBus
+from guardrun.messages import ModelResponse
+from guardrun.providers.base import ModelRequest
+from guardrun.providers.scripted import ScriptedProvider, text_turn, tool_turn
+from guardrun.tools.base import ToolContext
+from guardrun.tools.builtin import file_tools
+from guardrun.tools.registry import ToolRegistry
+from guardrun.usage import Usage
 
 
 def make_agent(root: Path, turns: list[ModelResponse], **kwargs: object) -> Agent:

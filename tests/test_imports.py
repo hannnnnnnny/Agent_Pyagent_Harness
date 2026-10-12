@@ -1,7 +1,7 @@
-"""Each module must import cleanly on its own, without pyagent already loaded.
+"""Each module must import cleanly on its own, without guardrun already loaded.
 
 Import cycles only show up depending on which module is imported first, so
-every module is imported with all ``pyagent`` modules purged beforehand.
+every module is imported with all ``guardrun`` modules purged beforehand.
 Third-party packages stay cached, which keeps this fast.
 """
 
@@ -9,12 +9,12 @@ import pkgutil
 import subprocess
 import sys
 
-import pyagent
+import guardrun
 
 # __main__ modules run the CLI on import, so they are exercised by the CLI tests instead.
 MODULES = sorted(
     m.name
-    for m in pkgutil.walk_packages(pyagent.__path__, prefix="pyagent.")
+    for m in pkgutil.walk_packages(guardrun.__path__, prefix="guardrun.")
     if not m.name.endswith(".__main__")
 )
 
@@ -22,7 +22,7 @@ SCRIPT = """
 import importlib, sys, traceback
 failures = []
 for name in sys.argv[1:]:
-    for loaded in [m for m in sys.modules if m == "pyagent" or m.startswith("pyagent.")]:
+    for loaded in [m for m in sys.modules if m == "guardrun" or m.startswith("guardrun.")]:
         del sys.modules[loaded]
     try:
         importlib.import_module(name)
@@ -44,4 +44,4 @@ def test_every_module_imports_in_isolation() -> None:
 
 
 def test_module_list_is_not_empty() -> None:
-    assert "pyagent.agent" in MODULES
+    assert "guardrun.agent" in MODULES

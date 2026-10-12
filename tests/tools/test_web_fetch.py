@@ -1,14 +1,14 @@
 import pytest
 
-from pyagent.messages import ToolCall
-from pyagent.safety.gate import SafetyGate
-from pyagent.safety.modes import ApprovalMode
-from pyagent.safety.verdict import Verdict
-from pyagent.tools.base import Risk
-from pyagent.tools.builtin.web_fetch import WebFetch
-from pyagent.tools.executor import ToolExecutor
-from pyagent.tools.registry import ToolRegistry
-from pyagent.web import Fetcher, FetchResult
+from guardrun.messages import ToolCall
+from guardrun.safety.gate import SafetyGate
+from guardrun.safety.modes import ApprovalMode
+from guardrun.safety.verdict import Verdict
+from guardrun.tools.base import Risk
+from guardrun.tools.builtin.web_fetch import WebFetch
+from guardrun.tools.executor import ToolExecutor
+from guardrun.tools.registry import ToolRegistry
+from guardrun.web import Fetcher, FetchResult
 from tests.tools.conftest import Runner
 
 

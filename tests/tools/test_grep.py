@@ -1,7 +1,7 @@
 import pytest
 
-from pyagent.tools.builtin import grep as grep_module
-from pyagent.tools.builtin.grep import Grep
+from guardrun.tools.builtin import grep as grep_module
+from guardrun.tools.builtin.grep import Grep
 from tests.tools.conftest import Runner
 
 tool = Grep()

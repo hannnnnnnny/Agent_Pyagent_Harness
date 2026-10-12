@@ -1,7 +1,7 @@
 import pytest
 
-from pyagent.errors import SandboxViolation
-from pyagent.safety.paths import check_path_text
+from guardrun.errors import SandboxViolation
+from guardrun.safety.paths import check_path_text
 
 
 @pytest.mark.parametrize("path", ["a.txt", "src/pkg/mod.py", "C:/work/a.txt", "./x", "dir\\f"])

@@ -13,9 +13,9 @@ import sys
 import tempfile
 from pathlib import Path
 
-from pyagent import AgentOptions, ApprovalMode, build_agent
-from pyagent.cli.render import ConsoleRenderer, format_result
-from pyagent.providers.scripted import ScriptedProvider, text_turn, tool_turn
+from guardrun import AgentOptions, ApprovalMode, build_agent
+from guardrun.cli.render import ConsoleRenderer, format_result
+from guardrun.providers.scripted import ScriptedProvider, text_turn, tool_turn
 
 
 def main() -> int:

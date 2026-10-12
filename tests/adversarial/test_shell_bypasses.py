@@ -10,9 +10,9 @@ from pathlib import Path
 
 import pytest
 
-from pyagent.safety.command_policy import CommandPolicy
-from pyagent.safety.verdict import Verdict
-from pyagent.safety.workspace import Workspace
+from guardrun.safety.command_policy import CommandPolicy
+from guardrun.safety.verdict import Verdict
+from guardrun.safety.workspace import Workspace
 
 MUST_BLOCK = [
     # privilege escalation, however it is dressed up
