@@ -6,33 +6,18 @@ All notable changes to GuardRun are documented here. The format follows
 
 ## [Unreleased]
 
-### Changed
-- Renamed the project from pyagent to GuardRun, since the old name was already
-  taken on PyPI. The package is now `guardrun`, the command `guardrun`, the
-  config file `guardrun.toml`, the state directory `.guardrun/`, and child
-  processes see `GUARDRUN=1`. Rename an existing `pyagent.toml` and
-  `.pyagent/` to keep their settings and sessions.
+## [0.1.0] - 2026-10-20
 
-### Added
-- DeepSeek support (`deepseek-v4-pro`, `deepseek-flash`) through DeepSeek's
-  Anthropic-compatible API, now the default provider. Select with
-  `[model] provider` or `--provider`; the key comes from `DEEPSEEK_API_KEY`.
-- `guardrun doctor` checks Python, credentials (presence only), shell, config,
-  and workspace permissions.
-- `guardrun run --json` prints a single machine-readable result and never prompts.
-- `instructions_file` loads project guidance (e.g. `AGENTS.md`) through the sandbox.
-- `AgentOptions.extra_gates` for project-specific policy rules.
-- `limits.max_tool_output_chars` to tune how much tool output reaches the model.
+First release: a safety-first agent harness for DeepSeek and Claude.
 
-### Security
-- `web_fetch` without `allow_domains` now always needs approval, so unattended
-  runs cannot send data to arbitrary URLs.
-
-## [0.1.0]
-
-First release: a safety-first agent harness for Claude.
+Earlier development builds were named pyagent. Rename an existing
+`pyagent.toml` and `.pyagent/` to `guardrun.toml` and `.guardrun/` to keep their
+settings and sessions.
 
 ### Agent
+- DeepSeek (`deepseek-v4-pro`, `deepseek-flash`, the default) through DeepSeek's
+  Anthropic-compatible API, or Claude. Select with `[model] provider` or
+  `--provider`; the key comes from `DEEPSEEK_API_KEY` or `ANTHROPIC_API_KEY`.
 - Manual tool-use loop over the Anthropic Messages API with adaptive thinking,
   configurable effort, streaming, prompt caching, and server-side refusal fallbacks.
 - Append-only conversation history that preserves thinking blocks verbatim.
@@ -42,6 +27,8 @@ First release: a safety-first agent harness for Claude.
 - Per-turn tool call limit, identical-call loop guard, and concurrent execution
   of read-only, approval-free calls.
 - Sessions that can be saved and resumed.
+- `instructions_file` loads project guidance (e.g. `AGENTS.md`) through the sandbox.
+- `limits.max_tool_output_chars` to tune how much tool output reaches the model.
 
 ### Tools
 - `read_file`, `list_dir`, `glob`, `grep`, `write_file`, `edit_file`,
@@ -61,10 +48,15 @@ First release: a safety-first agent harness for Claude.
   flagging, and a redacted JSONL audit log.
 - SSRF-protected `web_fetch`: public addresses only, pinned connections,
   per-hop redirect checks, and rejection of ambiguous numeric hosts.
+- `AgentOptions.extra_gates` for project-specific policy rules.
+- `web_fetch` without `allow_domains` always needs approval, so unattended
+  runs cannot send data to arbitrary URLs.
 - An adversarial test suite of known escape and bypass attempts.
 
 ### Tooling
-- `guardrun` CLI: `run`, `chat`, `policy`, `audit`, `usage`, `sessions`, `init`.
+- `guardrun` CLI: `run`, `chat`, `policy`, `audit`, `usage`, `sessions`, `init`, and
+  `doctor` (Python, credential presence, shell, config, workspace permissions).
+- `guardrun run --json` prints a single machine-readable result and never prompts.
 - Strict `guardrun.toml` configuration.
 - CI on Linux, macOS, and Windows for Python 3.10 to 3.14, a 95% coverage floor,
   CodeQL, and Dependabot.
